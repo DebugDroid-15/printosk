@@ -123,8 +123,7 @@ export default function UploadPage() {
         orderId: orderResponse.order?.id,
         amount,
         email,
-        name: 'Printosk Print Job',
-        description,
+        phone,
         onSuccess: async (paymentId: string, signature: string) => {
           // Verify signature and create print job
           try {
