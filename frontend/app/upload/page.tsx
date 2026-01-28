@@ -107,27 +107,24 @@ export default function UploadPage() {
       }
 
       const amount = calculatePrice();
+      const receipt = `order_${Date.now()}`;
+      const description = `${uploadedFiles.length} files - ${settings.colorMode} - ${settings.copies} copies`;
 
       // Create order
-      const orderResponse = await createRazorpayOrder({
-        amount,
-        description: `${uploadedFiles.length} files - ${settings.colorMode} - ${settings.copies} copies`,
-        email,
-        contact: phone,
-      });
+      const orderResponse = await createRazorpayOrder(amount, receipt, description);
 
-      if (!orderResponse.success || !orderResponse.orderId) {
-        setError(orderResponse.error || 'Failed to create payment order');
+      if (!orderResponse.success) {
+        setError(String(orderResponse.error) || 'Failed to create payment order');
         return;
       }
 
       // Open Razorpay checkout
       openRazorpayCheckout({
-        orderId: orderResponse.orderId,
+        orderId: orderResponse.order?.id,
         amount,
         email,
         name: 'Printosk Print Job',
-        description: `${uploadedFiles.length} files - ${settings.colorMode} - ${settings.copies} copies`,
+        description,
         onSuccess: async (paymentId: string, signature: string) => {
           // Verify signature and create print job
           try {
@@ -135,7 +132,7 @@ export default function UploadPage() {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                orderId: orderResponse.orderId,
+                orderId: orderResponse.order?.id,
                 paymentId,
                 signature,
                 email,
