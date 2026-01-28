@@ -17,9 +17,9 @@ function ConfirmationContent() {
       <div className="container" style={{ textAlign: 'center', paddingTop: '4rem' }}>
         <h2>❌ Invalid Print ID</h2>
         <p>Could not retrieve your print ID. Please try again.</p>
-        <Link href="/upload" className="btn btn-primary">
+        <button onClick={() => window.location.href = '/upload'} className="btn btn-primary">
           Try Again
-        </Link>
+        </button>
       </div>
     );
   }
@@ -108,8 +108,8 @@ function ConfirmationContent() {
               marginBottom: '0.75rem',
               transition: 'all 0.3s ease',
             }}
-            onMouseOver={(e) => (e.target.style.transform = 'translateY(-2px)', e.target.style.boxShadow = '0 8px 20px rgba(16,185,129,0.4)')}
-            onMouseOut={(e) => (e.target.style.transform = 'translateY(0)', e.target.style.boxShadow = 'none')}
+            onMouseOver={(e) => {const el = e.target as HTMLElement; el.style.transform = 'translateY(-2px)'; el.style.boxShadow = '0 8px 20px rgba(16,185,129,0.4)'}}
+            onMouseOut={(e) => {const el = e.target as HTMLElement; el.style.transform = 'translateY(0)'; el.style.boxShadow = 'none'}}
           >
             📋 Copy Print ID
           </button>
@@ -128,8 +128,8 @@ function ConfirmationContent() {
               fontWeight: '600',
               transition: 'all 0.3s ease',
             }}
-            onMouseOver={(e) => (e.target.style.backgroundColor = '#667eea', e.target.style.color = 'white')}
-            onMouseOut={(e) => (e.target.style.backgroundColor = '#f3f4f6', e.target.style.color = '#667eea')}
+            onMouseOver={(e) => {const el = e.target as HTMLElement; el.style.backgroundColor = '#667eea'; el.style.color = 'white'}}
+            onMouseOut={(e) => {const el = e.target as HTMLElement; el.style.backgroundColor = '#f3f4f6'; el.style.color = '#667eea'}}
           >
             Upload More Files
           </button>
@@ -196,9 +196,6 @@ function ConfirmationContent() {
         `}</style>
       </div>
     </div>
-  );
-}
-
   );
 }
 
