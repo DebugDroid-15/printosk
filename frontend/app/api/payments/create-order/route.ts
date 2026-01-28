@@ -40,13 +40,10 @@ export async function POST(request: NextRequest) {
       console.log('[MOCK MODE] Creating test order');
       return NextResponse.json(
         {
-          success: true,
-          order: {
-            id: `order_test_${Date.now()}`,
-            amount: body.amount,
-            currency: 'INR',
-            status: 'created',
-          },
+          id: `order_test_${Date.now()}`,
+          amount: body.amount,
+          currency: 'INR',
+          status: 'created',
         },
         { status: 200 }
       );
@@ -71,7 +68,7 @@ export async function POST(request: NextRequest) {
       const errorData = await orderResponse.json();
       console.error('Razorpay error:', errorData);
       return NextResponse.json(
-        { success: false, error: 'Failed to create order' },
+        { error: 'Failed to create order' },
         { status: 500 }
       );
     }
@@ -80,13 +77,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       {
-        success: true,
-        order: {
-          id: order.id,
-          amount: order.amount,
-          currency: order.currency,
-          status: order.status,
-        },
+        id: order.id,
+        amount: order.amount,
+        currency: order.currency,
+        status: order.status,
       },
       { status: 200 }
     );
