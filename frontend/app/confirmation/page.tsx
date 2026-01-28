@@ -8,6 +8,8 @@
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
+export const dynamic = 'force-dynamic';
+
 export default function ConfirmationPage() {
   const searchParams = useSearchParams();
   const printId = searchParams.get('printId');
