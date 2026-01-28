@@ -1,0 +1,49 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+
+# Next.js
+.next/
+out/
+build/
+
+# Production
+dist/
+
+# Misc
+.DS_Store
+*.log
+*.logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Environment
+.env.local
+.env.*.local
+.env
+
+# IDE
+.idea/
+.vscode/settings.json
+*.swp
+*.swo
+*~
+
+# OS
+Thumbs.db
+
+# Hardware
+*.elf
+*.bin
+.pio/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
