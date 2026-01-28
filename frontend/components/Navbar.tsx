@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+
 export function Navbar() {
   return (
     <header style={{
@@ -21,13 +23,12 @@ export function Navbar() {
           display: 'flex',
           alignItems: 'center',
           gap: '0.75rem',
-          fontSize: '1.25rem',
-          fontWeight: 'bold',
-          color: '#667eea',
           backgroundColor: 'transparent',
           border: 'none',
           cursor: 'pointer',
           transition: 'transform 0.2s ease',
+          height: '50px',
+          padding: 0,
         }}
         onMouseEnter={(e) => {
           const el = e.currentTarget as HTMLElement;
@@ -38,7 +39,13 @@ export function Navbar() {
           el.style.transform = 'scale(1)';
         }}
       >
-        🖨️ Printosk
+        <Image
+          src="/images/logo.svg"
+          alt="Printosk Logo"
+          width={200}
+          height={50}
+          style={{ objectFit: 'contain', height: '50px', width: 'auto' }}
+        />
       </button>
 
       {/* Navigation */}

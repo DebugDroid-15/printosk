@@ -1,0 +1,62 @@
+<svg viewBox="0 0 870 480" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Printer Mailbox -->
+  <g id="printer">
+    <!-- Main body - Mailbox base -->
+    <ellipse cx="280" cy="280" rx="140" ry="120" fill="#003D99" opacity="0.3"/>
+    <path d="M160 280 Q160 200 240 180 L320 180 Q400 200 400 280 L400 320 Q400 360 320 370 L240 370 Q160 360 160 320 Z" fill="#0052CC"/>
+    
+    <!-- Mailbox door (left side) -->
+    <path d="M180 220 Q180 180 220 170 L280 170 Q300 175 300 200 L300 340 Q300 360 280 365 L220 365 Q180 360 180 340 Z" fill="#0066FF" opacity="0.9"/>
+    
+    <!-- Mailbox door shine -->
+    <ellipse cx="240" cy="240" rx="35" ry="55" fill="white" opacity="0.3"/>
+    
+    <!-- Flag pole -->
+    <rect x="330" y="260" width="8" height="60" fill="#003D99"/>
+    
+    <!-- Flag -->
+    <rect x="338" y="260" width="50" height="35" fill="#FF6B6B" rx="4"/>
+    <circle cx="360" cy="278" r="6" fill="#003D99"/>
+    
+    <!-- Mailbox opening slot -->
+    <rect x="200" y="280" width="120" height="12" fill="#001a4d"/>
+    
+    <!-- Paper sticking out from top -->
+    <rect x="240" y="120" width="35" height="70" fill="#F5F5F5" rx="2"/>
+    <line x1="245" y1="130" x2="270" y2="130" stroke="#CCCCCC" strokeWidth="1"/>
+    <line x1="245" y1="145" x2="270" y2="145" stroke="#CCCCCC" strokeWidth="1"/>
+    <line x1="245" y1="160" x2="270" y2="160" stroke="#CCCCCC" strokeWidth="1"/>
+    
+    <!-- Paper curl effect -->
+    <path d="M 275 125 Q 290 120 295 135 Q 293 140 280 138" fill="#F0F0F0"/>
+    
+    <!-- Happy face -->
+    <!-- Left eye -->
+    <circle cx="220" cy="240" r="8" fill="#FF6B6B"/>
+    <circle cx="222" cy="238" r="3" fill="white"/>
+    
+    <!-- Right eye -->
+    <circle cx="280" cy="240" r="8" fill="#FF6B6B"/>
+    <circle cx="282" cy="238" r="3" fill="white"/>
+    
+    <!-- Smile -->
+    <path d="M 230 280 Q 250 295 270 280" stroke="#FF6B6B" strokeWidth="4" fill="none" strokeLinecap="round"/>
+  </g>
+  
+  <!-- Pixel dots effect -->
+  <g id="pixels" fill="#00AAFF" opacity="0.8">
+    <rect x="420" y="180" width="30" height="30" rx="3"/>
+    <rect x="470" y="160" width="30" height="30" rx="3"/>
+    <rect x="420" y="250" width="30" height="30" rx="3"/>
+    <rect x="470" y="280" width="30" height="30" rx="3"/>
+    <rect x="445" y="220" width="20" height="20" rx="2"/>
+  </g>
+  
+  <!-- Text: Printosk -->
+  <text x="540" y="310" font-family="Arial, sans-serif" font-size="120" font-weight="bold" fill="#001a4d" letter-spacing="-2">
+    Printosk
+  </text>
+  
+  <!-- Blue circle accent in 'o' -->
+  <circle cx="730" cy="280" r="50" fill="none" stroke="#00AAFF" stroke-width="8" opacity="0.9"/>
+</svg>
