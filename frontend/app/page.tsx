@@ -5,67 +5,171 @@
 
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 
 export default function Home() {
-  const [mockMode] = useState(process.env.NEXT_PUBLIC_MOCK_MODE === 'true');
-
   return (
-    <div className="container">
-      <div style={{ textAlign: 'center', paddingTop: '4rem', paddingBottom: '4rem' }}>
-        <h1 style={{ fontSize: '3rem', marginBottom: '1rem', color: '#333' }}>
-          Printosk
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#f5f5f5' }}>
+      {/* Header */}
+      <header style={{
+        backgroundColor: 'white',
+        padding: '1rem 2rem',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '1.25rem', fontWeight: 'bold', color: '#007bff' }}>
+          🖨️ QuickPrint Station
+        </div>
+        <select style={{
+          padding: '0.5rem 1rem',
+          border: '1px solid #ddd',
+          borderRadius: '4px',
+          backgroundColor: 'white',
+          cursor: 'pointer',
+        }}>
+          <option>English</option>
+          <option>Spanish</option>
+          <option>French</option>
+        </select>
+      </header>
+
+      {/* Hero Section */}
+      <main style={{
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '4rem 2rem',
+        textAlign: 'center',
+      }}>
+        <h1 style={{
+          fontSize: '3.5rem',
+          fontWeight: 'bold',
+          marginBottom: '1rem',
+          color: '#222',
+          lineHeight: '1.2',
+        }}>
+          Print Your Memories<br />& Documents
         </h1>
-        <p style={{ fontSize: '1.25rem', marginBottom: '2rem', color: '#666' }}>
-          Self-Service Printing Made Simple
+
+        <p style={{
+          fontSize: '1.2rem',
+          color: '#666',
+          marginBottom: '3rem',
+          maxWidth: '600px',
+        }}>
+          Select an option below to get started
         </p>
 
-        <div style={{ marginBottom: '2rem' }}>
-          <p style={{ marginBottom: '1rem' }}>
-            Upload your documents, choose your print settings, and get a Print ID in seconds.
-          </p>
-          <p style={{ marginBottom: '2rem' }}>
-            Then head to any of our kiosks and enter your ID to print.
-          </p>
-        </div>
-
-        {mockMode && (
-          <div className="alert alert-info" style={{ maxWidth: '500px', margin: '0 auto 2rem' }}>
-            🧪 Running in MOCK MODE - Payments are simulated
-          </div>
-        )}
-
-        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-          <Link href="/upload" className="btn btn-primary" style={{ fontSize: '1.1rem', padding: '1rem 2rem' }}>
-            Start Printing
+        {/* CTA Buttons */}
+        <div style={{
+          display: 'flex',
+          gap: '2rem',
+          justifyContent: 'center',
+          flexWrap: 'wrap',
+          marginBottom: '3rem',
+        }}>
+          {/* Start Printing Button */}
+          <Link href="/upload" style={{ textDecoration: 'none' }}>
+            <button style={{
+              padding: '2rem 3rem',
+              fontSize: '1.2rem',
+              fontWeight: 'bold',
+              backgroundColor: '#007bff',
+              color: 'white',
+              border: 'none',
+              borderRadius: '12px',
+              cursor: 'pointer',
+              minWidth: '300px',
+              boxShadow: '0 8px 20px rgba(0,123,255,0.3)',
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '0.5rem',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-4px)';
+              e.currentTarget.style.boxShadow = '0 12px 28px rgba(0,123,255,0.4)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,123,255,0.3)';
+            }}
+            >
+              <span style={{ fontSize: '2rem' }}>📷</span>
+              <span>Start Printing</span>
+              <span style={{ fontSize: '0.9rem', opacity: 0.9 }}>Photos, Documents, & More</span>
+            </button>
           </Link>
-          <Link href="/lookup" className="btn btn-secondary" style={{ fontSize: '1.1rem', padding: '1rem 2rem' }}>
-            Check Status
+
+          {/* Order Status Button */}
+          <Link href="/lookup" style={{ textDecoration: 'none' }}>
+            <button style={{
+              padding: '2rem 3rem',
+              fontSize: '1.2rem',
+              fontWeight: 'bold',
+              backgroundColor: 'white',
+              color: '#333',
+              border: '2px solid #ddd',
+              borderRadius: '12px',
+              cursor: 'pointer',
+              minWidth: '300px',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+              transition: 'transform 0.2s, box-shadow 0.2s, border-color 0.2s',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '0.5rem',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-4px)';
+              e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.12)';
+              e.currentTarget.style.borderColor = '#007bff';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.08)';
+              e.currentTarget.style.borderColor = '#ddd';
+            }}
+            >
+              <span style={{ fontSize: '2rem' }}>📋</span>
+              <span>Order Status</span>
+              <span style={{ fontSize: '0.9rem', opacity: 0.8 }}>Check pickup time or details</span>
+            </button>
           </Link>
         </div>
+      </main>
 
-        <div style={{ marginTop: '4rem', padding: '2rem', backgroundColor: '#f8f9fa', borderRadius: '8px', maxWidth: '600px', margin: '4rem auto' }}>
-          <h2 style={{ marginBottom: '1rem' }}>How It Works</h2>
-          <ol style={{ textAlign: 'left', lineHeight: '1.8' }}>
-            <li><strong>Upload:</strong> Select your PDF, image, or document files</li>
-            <li><strong>Configure:</strong> Choose color/B&W, copies, paper size</li>
-            <li><strong>Pay:</strong> Secure payment via Razorpay</li>
-            <li><strong>Get ID:</strong> Receive a unique 6-digit Print ID</li>
-            <li><strong>Print:</strong> Enter your ID at the kiosk to print</li>
-            <li><strong>Done:</strong> Files are securely deleted after printing</li>
-          </ol>
-        </div>
-
-        <div style={{ marginTop: '3rem', padding: '1.5rem', backgroundColor: '#e7f3ff', borderRadius: '8px', maxWidth: '600px', margin: '3rem auto', textAlign: 'left' }}>
-          <h3 style={{ marginBottom: '0.5rem' }}>📋 Requirements</h3>
-          <ul style={{ marginLeft: '1.5rem' }}>
-            <li>Valid email address</li>
-            <li>PDF, DOC, or image files (max 50MB each)</li>
-            <li>Payment via Razorpay</li>
-          </ul>
-        </div>
-      </div>
+      {/* Footer */}
+      <footer style={{
+        backgroundColor: 'white',
+        padding: '2rem',
+        textAlign: 'center',
+        borderTop: '1px solid #eee',
+      }}>
+        <button style={{
+          padding: '0.75rem 1.5rem',
+          backgroundColor: '#333',
+          color: 'white',
+          border: 'none',
+          borderRadius: '8px',
+          cursor: 'pointer',
+          fontSize: '1rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem',
+          margin: '0 auto',
+        }}>
+          🎧 Need help? Tap here for 24/7 Support
+        </button>
+        <p style={{ color: '#999', marginTop: '1.5rem', fontSize: '0.9rem' }}>
+          Secure • Fast • Convenient
+        </p>
+      </footer>
     </div>
   );
 }
