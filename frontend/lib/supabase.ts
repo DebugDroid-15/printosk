@@ -17,7 +17,7 @@ export async function fetchJobByPrintId(printId: string) {
   try {
     const { data, error } = await supabase
       .from('print_jobs')
-      .select('*, print_files(*, users(*))')
+      .select('*, print_files(*)')
       .eq('print_id_numeric', parseInt(printId, 10))
       .single();
 
@@ -30,13 +30,33 @@ export async function fetchJobByPrintId(printId: string) {
 }
 
 /**
+ * Fetch print job by email
+ */
+export async function fetchJobsByEmail(email: string) {
+  try {
+    const { data, error } = await supabase
+      .from('print_jobs')
+      .select('*, print_files(*)')
+      .eq('email', email)
+      .order('created_at', { ascending: false })
+      .limit(10);
+
+    if (error) throw error;
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error fetching jobs by email:', error);
+    return { success: false, error };
+  }
+}
+
+/**
  * Get print job status
  */
 export async function getJobStatus(jobId: string) {
   try {
     const { data, error } = await supabase
       .from('print_jobs')
-      .select('status, status_message, updated_at')
+      .select('status, status_message, updated_at, payment_status')
       .eq('id', jobId)
       .single();
 
@@ -44,6 +64,67 @@ export async function getJobStatus(jobId: string) {
     return { success: true, data };
   } catch (error) {
     console.error('Error getting job status:', error);
+    return { success: false, error };
+  }
+}
+
+/**
+ * Create a new print job
+ */
+export async function createPrintJob(jobData: {
+  print_id_numeric: number;
+  email: string;
+  file_count: number;
+  color_mode?: string;
+  paper_size?: string;
+  duplex_mode?: string;
+  copies?: number;
+  total_amount: number;
+}) {
+  try {
+    const { data, error } = await supabase
+      .from('print_jobs')
+      .insert([{
+        ...jobData,
+        status: 'PENDING',
+        payment_status: 'PENDING',
+        expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+      }])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error creating print job:', error);
+    return { success: false, error };
+  }
+}
+
+/**
+ * Update print job status
+ */
+export async function updateJobStatus(
+  jobId: string,
+  status: string,
+  statusMessage?: string
+) {
+  try {
+    const { data, error } = await supabase
+      .from('print_jobs')
+      .update({
+        status,
+        status_message: statusMessage,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', jobId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error updating job status:', error);
     return { success: false, error };
   }
 }
@@ -97,6 +178,61 @@ export async function uploadFile(
     return { success: true, path: filePath };
   } catch (error) {
     console.error('Error uploading file:', error);
+    return { success: false, error };
+  }
+}
+
+/**
+ * Record payment in database
+ */
+export async function recordPayment(paymentData: {
+  job_id: string;
+  order_id: string;
+  payment_id: string;
+  amount: number;
+  status: string;
+  razorpay_signature?: string;
+  razorpay_response?: any;
+}) {
+  try {
+    const { data, error } = await supabase
+      .from('payment_records')
+      .insert([{
+        ...paymentData,
+        currency: 'INR',
+        created_at: new Date().toISOString(),
+      }])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error recording payment:', error);
+    return { success: false, error };
+  }
+}
+
+/**
+ * Log activity
+ */
+export async function logActivity(
+  jobId: string,
+  action: string,
+  details?: any
+) {
+  try {
+    await supabase
+      .from('activity_logs')
+      .insert([{
+        job_id: jobId,
+        action,
+        details: details || {},
+        created_at: new Date().toISOString(),
+      }]);
+    return { success: true };
+  } catch (error) {
+    console.error('Error logging activity:', error);
     return { success: false, error };
   }
 }
