@@ -153,7 +153,7 @@ export default function UploadPage() {
             setError(String(errorMsg));
           }
         },
-        onError: (error: any) => {
+        onFailure: (error: any) => {
           const errorMsg = error?.message || String(error) || 'Payment failed';
           setError(String(errorMsg));
         },
