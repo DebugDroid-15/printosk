@@ -7,6 +7,7 @@
 
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
+import { Navbar } from '@/components/Navbar';
 
 function ConfirmationContent() {
   const searchParams = useSearchParams();
@@ -30,8 +31,9 @@ function ConfirmationContent() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      background: 'none',
       padding: '2rem',
+      paddingTop: 0,
     }}>
       <div style={{ maxWidth: '500px', width: '100%', animation: 'slideUp 0.6s ease-out' }}>
         {/* Success Card */}
@@ -201,8 +203,16 @@ function ConfirmationContent() {
 
 export default function ConfirmationPage() {
   return (
-    <Suspense fallback={<div className="container" style={{ textAlign: 'center', paddingTop: '4rem' }}>Loading...</div>}>
-      <ConfirmationContent />
-    </Suspense>
+    <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      display: 'flex',
+      flexDirection: 'column',
+    }}>
+      <Navbar />
+      <Suspense fallback={<div className="container" style={{ textAlign: 'center', paddingTop: '4rem' }}>Loading...</div>}>
+        <ConfirmationContent />
+      </Suspense>
+    </div>
   );
 }

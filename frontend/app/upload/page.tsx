@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import { Navbar } from '@/components/Navbar';
 import { loadRazorpayScript, openRazorpayCheckout, createRazorpayOrder } from '@/lib/razorpay';
 import { validateEmail, validateFile, formatFileSize } from '@/lib/utils';
 
@@ -169,6 +170,8 @@ export default function UploadPage() {
       background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
       padding: '2rem',
     }}>
+      <Navbar />
+      
       {/* Header */}
       <div style={{ maxWidth: '1200px', margin: '0 auto 3rem', color: 'white' }}>
         <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>📋 Print Your Documents</h1>

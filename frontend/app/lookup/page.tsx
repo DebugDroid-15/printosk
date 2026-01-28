@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Navbar } from '@/components/Navbar';
 
 interface PrintJob {
   printId: string;
@@ -93,13 +94,21 @@ export default function LookupPage() {
     <div style={{
       minHeight: '100vh',
       background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      padding: '2rem',
+      display: 'flex',
+      flexDirection: 'column',
     }}>
-      {/* Header */}
-      <div style={{ maxWidth: '600px', margin: '0 auto 2rem', color: 'white' }}>
-        <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>📍 Find Your Print</h1>
-        <p style={{ fontSize: '1.125rem', opacity: 0.9 }}>Search by Print ID or email</p>
-      </div>
+      <Navbar />
+      <div style={{
+        flex: 1,
+        padding: '2rem',
+        display: 'flex',
+        flexDirection: 'column',
+      }}>
+        {/* Header */}
+        <div style={{ maxWidth: '600px', margin: '0 auto 2rem', color: 'white' }}>
+          <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>📍 Find Your Print</h1>
+          <p style={{ fontSize: '1.125rem', opacity: 0.9 }}>Search by Print ID or email</p>
+        </div>
 
       {/* Search Card */}
       <div style={{
@@ -256,6 +265,7 @@ export default function LookupPage() {
           }
         }
       `}</style>
+      </div>
     </div>
   );
 }

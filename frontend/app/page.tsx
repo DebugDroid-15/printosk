@@ -5,35 +5,13 @@
 
 'use client';
 
+import { Navbar } from '@/components/Navbar';
+
 export default function Home() {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
-      {/* Header */}
-      <header style={{
-        backgroundColor: 'rgba(255, 255, 255, 0.95)',
-        padding: '1rem 2rem',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        backdropFilter: 'blur(10px)',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '1.25rem', fontWeight: 'bold', color: '#667eea' }}>
-          🖨️ Printosk
-        </div>
-        <select style={{
-          padding: '0.5rem 1rem',
-          border: '1px solid #ddd',
-          borderRadius: '4px',
-          backgroundColor: 'white',
-          cursor: 'pointer',
-        }}>
-          <option>English</option>
-          <option>Spanish</option>
-          <option>French</option>
-        </select>
-      </header>
-
+      <Navbar />
+      
       {/* Hero Section */}
       <main style={{
         flex: 1,
