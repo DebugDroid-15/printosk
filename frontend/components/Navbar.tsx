@@ -6,7 +6,7 @@ export function Navbar() {
   return (
     <header style={{
       backgroundColor: 'rgba(255, 255, 255, 0.95)',
-      padding: '1rem 2rem',
+      padding: '0.5rem 2rem',
       boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
       display: 'flex',
       justifyContent: 'space-between',
@@ -15,6 +15,7 @@ export function Navbar() {
       position: 'sticky',
       top: 0,
       zIndex: 100,
+      minHeight: '90px',
     }}>
       {/* Logo */}
       <button
@@ -26,7 +27,7 @@ export function Navbar() {
           border: 'none',
           cursor: 'pointer',
           transition: 'transform 0.2s ease',
-          padding: 0,
+          padding: '0.5rem',
           minWidth: 'fit-content',
         }}
         onMouseEnter={(e) => {
@@ -41,10 +42,10 @@ export function Navbar() {
         <Image
           src="/images/logo.svg"
           alt="Printosk Logo"
-          width={140}
-          height={40}
+          width={280}
+          height={80}
           priority
-          style={{ width: '140px', height: '40px' }}
+          style={{ width: '280px', height: '80px' }}
         />
       </button>
 
