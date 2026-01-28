@@ -99,8 +99,21 @@ export function openRazorpayCheckout(options: {
   onFailure: (error: any) => void;
 }) {
   const razorpayKey = process.env.NEXT_PUBLIC_RAZORPAY_KEY;
+  const mockMode = process.env.NEXT_PUBLIC_MOCK_MODE === 'true';
+
   if (!razorpayKey) {
     throw new Error('Razorpay key not configured');
+  }
+
+  // In mock/test mode, simulate successful payment after 2 seconds
+  if (mockMode || razorpayKey === 'test') {
+    console.log('[MOCK MODE] Simulating payment completion in 2 seconds...');
+    setTimeout(() => {
+      const mockPaymentId = `pay_test_${Date.now()}`;
+      const mockSignature = `sig_test_${Date.now()}`;
+      options.onSuccess(mockPaymentId, mockSignature);
+    }, 2000);
+    return;
   }
 
   const RazorpayCheckout = (window as any).Razorpay;
