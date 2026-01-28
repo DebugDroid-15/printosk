@@ -7,10 +7,9 @@
 
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { Suspense } from 'react';
 
-export const dynamic = 'force-dynamic';
-
-export default function ConfirmationPage() {
+function ConfirmationContent() {
   const searchParams = useSearchParams();
   const printId = searchParams.get('printId');
 
@@ -195,5 +194,13 @@ export default function ConfirmationPage() {
         }
       `}</style>
     </div>
+  );
+}
+
+export default function ConfirmationPage() {
+  return (
+    <Suspense fallback={<div className="container" style={{ textAlign: 'center', paddingTop: '4rem' }}>Loading...</div>}>
+      <ConfirmationContent />
+    </Suspense>
   );
 }
