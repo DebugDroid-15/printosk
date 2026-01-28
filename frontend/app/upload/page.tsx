@@ -1,12 +1,6 @@
-/**
- * Printosk - Upload & Print Settings Page
- * Step 1: File upload, Step 2: Print settings, Step 3: Payment
- */
-
 'use client';
 
 import { useState, useRef } from 'react';
-import Link from 'next/link';
 import { loadRazorpayScript, openRazorpayCheckout, createRazorpayOrder } from '@/lib/razorpay';
 import { validateEmail, validateFile, formatFileSize } from '@/lib/utils';
 
@@ -170,286 +164,361 @@ export default function UploadPage() {
   const displayPrice = (totalPrice / 100).toFixed(2);
 
   return (
-    <div className="container">
-      <div style={{ maxWidth: '800px', margin: '0 auto', paddingTop: '2rem', paddingBottom: '2rem' }}>
-        {/* Step Indicator */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem' }}>
-          <div style={{
-            padding: '0.5rem 1rem',
-            borderRadius: '50%',
-            backgroundColor: step >= 1 ? '#007bff' : '#e9ecef',
-            color: step >= 1 ? 'white' : '#666',
-            textAlign: 'center',
-            fontWeight: 'bold',
-          }}>
-            1
-          </div>
-          <div style={{ flex: 1, borderTop: '2px solid #e9ecef', marginTop: '1.5rem' }}></div>
-          <div style={{
-            padding: '0.5rem 1rem',
-            borderRadius: '50%',
-            backgroundColor: step >= 2 ? '#007bff' : '#e9ecef',
-            color: step >= 2 ? 'white' : '#666',
-            textAlign: 'center',
-            fontWeight: 'bold',
-          }}>
-            2
-          </div>
-          <div style={{ flex: 1, borderTop: '2px solid #e9ecef', marginTop: '1.5rem' }}></div>
-          <div style={{
-            padding: '0.5rem 1rem',
-            borderRadius: '50%',
-            backgroundColor: step >= 3 ? '#007bff' : '#e9ecef',
-            color: step >= 3 ? 'white' : '#666',
-            textAlign: 'center',
-            fontWeight: 'bold',
-          }}>
-            3
-          </div>
-        </div>
+    <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      padding: '2rem',
+    }}>
+      {/* Header */}
+      <div style={{ maxWidth: '1200px', margin: '0 auto 3rem', color: 'white' }}>
+        <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>📋 Print Your Documents</h1>
+        <p style={{ fontSize: '1.125rem', opacity: 0.9 }}>Step {step} of 3</p>
+      </div>
 
-        {/* Step 1: File Upload */}
+      {/* Main Container */}
+      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+
+        {/* Step 1: Upload & Contact */}
         {step === 1 && (
-          <div>
-            <h2>Step 1: Upload Files & Contact Info</h2>
-
-            {/* Email Input */}
-            <div style={{ marginBottom: '1.5rem' }}>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-                Email Address *
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #ddd',
-                  borderRadius: '4px',
-                  fontSize: '1rem',
-                  boxSizing: 'border-box',
-                }}
-              />
-            </div>
-
-            {/* Phone Input */}
-            <div style={{ marginBottom: '1.5rem' }}>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-                Phone Number (Optional)
-              </label>
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="+91 9876543210"
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #ddd',
-                  borderRadius: '4px',
-                  fontSize: '1rem',
-                  boxSizing: 'border-box',
-                }}
-              />
-            </div>
-
-            {/* File Upload Area */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: '2rem',
+            alignItems: 'start',
+          }}>
+            {/* Left: Contact Info */}
             <div style={{
-              border: '2px dashed #007bff',
-              borderRadius: '8px',
+              backgroundColor: 'white',
+              borderRadius: '16px',
               padding: '2rem',
-              textAlign: 'center',
-              marginBottom: '1.5rem',
-              cursor: 'pointer',
-              backgroundColor: '#f8f9ff',
-              transition: 'all 0.3s',
-            }}
-              onClick={() => fileInputRef.current?.click()}
-            >
+              boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+            }}>
+              <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', color: '#1f2937' }}>
+                📧 Contact Information
+              </h2>
+
+              <div style={{ marginBottom: '1.5rem' }}>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#374151' }}>
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="your@email.com"
+                  style={{
+                    width: '100%',
+                    padding: '0.875rem',
+                    border: '2px solid #e5e7eb',
+                    borderRadius: '8px',
+                    fontSize: '1rem',
+                    fontFamily: 'inherit',
+                    boxSizing: 'border-box',
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: '1.5rem' }}>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#374151' }}>
+                  Phone Number (Optional)
+                </label>
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="+91 1234567890"
+                  style={{
+                    width: '100%',
+                    padding: '0.875rem',
+                    border: '2px solid #e5e7eb',
+                    borderRadius: '8px',
+                    fontSize: '1rem',
+                    fontFamily: 'inherit',
+                    boxSizing: 'border-box',
+                  }}
+                />
+              </div>
+
+              {/* Privacy Notice */}
+              <div style={{
+                padding: '1rem',
+                backgroundColor: '#f0f9ff',
+                borderRadius: '8px',
+                border: '1px solid #bfdbfe',
+                marginBottom: '1.5rem',
+              }}>
+                <p style={{ margin: 0, fontSize: '0.875rem', color: '#1e40af' }}>
+                  🔒 Your information is secure and will be deleted after 24 hours.
+                </p>
+              </div>
+
+              <button
+                onClick={handleNextToSettings}
+                style={{
+                  width: '100%',
+                  padding: '0.875rem',
+                  backgroundColor: '#667eea',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                  fontSize: '1rem',
+                  transition: 'all 0.3s ease',
+                }}
+                onMouseOver={(e) => {const el = e.target as HTMLElement; el.style.transform = 'translateY(-2px)'; el.style.boxShadow = '0 8px 20px rgba(102,126,234,0.4)'}}
+                onMouseOut={(e) => {const el = e.target as HTMLElement; el.style.transform = 'translateY(0)'; el.style.boxShadow = 'none'}}
+              >
+                Continue to Upload →
+              </button>
+            </div>
+
+            {/* Right: File Upload */}
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '16px',
+              padding: '2rem',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+            }}>
+              <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', color: '#1f2937' }}>
+                📁 Upload Files
+              </h2>
+
+              {/* Upload Area */}
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                style={{
+                  border: '2px dashed #667eea',
+                  borderRadius: '12px',
+                  padding: '2rem',
+                  textAlign: 'center',
+                  cursor: 'pointer',
+                  backgroundColor: '#f0f4ff',
+                  marginBottom: '1.5rem',
+                  transition: 'all 0.3s ease',
+                }}
+                onMouseOver={(e) => {const el = e.target as HTMLElement; el.style.backgroundColor = '#e0e7ff'; el.style.borderColor = '#764ba2'}}
+                onMouseOut={(e) => {const el = e.target as HTMLElement; el.style.backgroundColor = '#f0f4ff'; el.style.borderColor = '#667eea'}}
+              >
+                <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>📤</div>
+                <p style={{ fontSize: '1rem', fontWeight: '600', color: '#1f2937', margin: '0.5rem 0' }}>
+                  Click to upload or drag & drop
+                </p>
+                <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: 0 }}>
+                  PDF, DOC, DOCX, PPT, XLS up to 50MB
+                </p>
+              </div>
+
               <input
                 ref={fileInputRef}
                 type="file"
                 multiple
-                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif"
                 onChange={handleFileChange}
                 style={{ display: 'none' }}
+                accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx"
               />
-              <p style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>📁 Click to upload files</p>
-              <p style={{ color: '#666', fontSize: '0.9rem' }}>or drag and drop</p>
-              <p style={{ color: '#999', fontSize: '0.8rem', marginTop: '0.5rem' }}>
-                PDF, DOC, or images (max 50MB each)
-              </p>
-            </div>
 
-            {/* Uploaded Files List */}
-            {uploadedFiles.length > 0 && (
-              <div style={{ marginBottom: '1.5rem' }}>
-                <h4>Uploaded Files ({uploadedFiles.length})</h4>
-                <div style={{ listStyleType: 'none', padding: 0 }}>
-                  {uploadedFiles.map((file, index) => (
-                    <div
-                      key={index}
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        padding: '0.75rem',
-                        backgroundColor: '#f8f9fa',
-                        marginBottom: '0.5rem',
-                        borderRadius: '4px',
-                        border: '1px solid #e9ecef',
-                      }}
-                    >
-                      <span>📄 {file.name} ({file.size})</span>
-                      <button
-                        onClick={() => removeFile(index)}
+              {/* Uploaded Files */}
+              {uploadedFiles.length > 0 && (
+                <div>
+                  <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '1rem', color: '#1f2937' }}>
+                    📋 Files ({uploadedFiles.length})
+                  </h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '300px', overflowY: 'auto' }}>
+                    {uploadedFiles.map((file, index) => (
+                      <div
+                        key={index}
                         style={{
-                          padding: '0.25rem 0.75rem',
-                          backgroundColor: '#dc3545',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '4px',
-                          cursor: 'pointer',
-                          fontSize: '0.9rem',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: '0.875rem',
+                          backgroundColor: '#f9fafb',
+                          borderRadius: '8px',
+                          border: '1px solid #e5e7eb',
                         }}
                       >
-                        Remove
-                      </button>
-                    </div>
-                  ))}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <p style={{ margin: '0 0 0.25rem 0', fontWeight: '600', color: '#1f2937', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {file.name}
+                          </p>
+                          <p style={{ margin: 0, fontSize: '0.875rem', color: '#6b7280' }}>
+                            {file.size}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => removeFile(index)}
+                          style={{
+                            padding: '0.5rem 0.75rem',
+                            backgroundColor: '#fee2e2',
+                            color: '#991b1b',
+                            border: 'none',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontWeight: '600',
+                            marginLeft: '0.75rem',
+                          }}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
-
-            {/* Error Message */}
-            {error && <div className="alert alert-danger">{error}</div>}
-
-            {/* Next Button */}
-            <button
-              onClick={handleNextToSettings}
-              className="btn btn-primary"
-              style={{ width: '100%', marginTop: '1rem' }}
-            >
-              Next: Print Settings →
-            </button>
+              )}
+            </div>
           </div>
         )}
 
         {/* Step 2: Print Settings */}
         {step === 2 && (
-          <div>
-            <h2>Step 2: Print Settings</h2>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '16px',
+            padding: '2rem',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+            maxWidth: '800px',
+            margin: '0 auto',
+          }}>
+            <h2 style={{ fontSize: '1.5rem', marginBottom: '2rem', color: '#1f2937' }}>
+              🎨 Print Settings
+            </h2>
 
             {/* Color Mode */}
-            <div style={{ marginBottom: '1.5rem' }}>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+            <div style={{ marginBottom: '2rem' }}>
+              <label style={{ display: 'block', marginBottom: '1rem', fontWeight: '600', color: '#1f2937' }}>
                 Color Mode
               </label>
-              <div style={{ display: 'flex', gap: '1rem' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <input
-                    type="radio"
-                    value="bw"
-                    checked={settings.colorMode === 'bw'}
-                    onChange={(e) => setSettings({ ...settings, colorMode: 'bw' })}
-                  />
-                  Black & White
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <input
-                    type="radio"
-                    value="color"
-                    checked={settings.colorMode === 'color'}
-                    onChange={(e) => setSettings({ ...settings, colorMode: 'color' as any })}
-                  />
-                  Color
-                </label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                {(['bw', 'color'] as const).map((mode) => (
+                  <button
+                    key={mode}
+                    onClick={() => setSettings({ ...settings, colorMode: mode })}
+                    style={{
+                      padding: '1rem',
+                      border: `2px solid ${settings.colorMode === mode ? '#667eea' : '#e5e7eb'}`,
+                      borderRadius: '12px',
+                      backgroundColor: settings.colorMode === mode ? '#f0f4ff' : 'white',
+                      cursor: 'pointer',
+                      fontWeight: '600',
+                      fontSize: '1rem',
+                      color: settings.colorMode === mode ? '#667eea' : '#6b7280',
+                      transition: 'all 0.3s ease',
+                    }}
+                  >
+                    {mode === 'bw' ? '⚪ Black & White' : '🌈 Color'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Paper Size */}
+            <div style={{ marginBottom: '2rem' }}>
+              <label style={{ display: 'block', marginBottom: '1rem', fontWeight: '600', color: '#1f2937' }}>
+                Paper Size
+              </label>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
+                {(['a4', 'letter', 'a3'] as const).map((size) => (
+                  <button
+                    key={size}
+                    onClick={() => setSettings({ ...settings, paperSize: size })}
+                    style={{
+                      padding: '1rem',
+                      border: `2px solid ${settings.paperSize === size ? '#667eea' : '#e5e7eb'}`,
+                      borderRadius: '12px',
+                      backgroundColor: settings.paperSize === size ? '#f0f4ff' : 'white',
+                      cursor: 'pointer',
+                      fontWeight: '600',
+                      color: settings.paperSize === size ? '#667eea' : '#6b7280',
+                      transition: 'all 0.3s ease',
+                    }}
+                  >
+                    {size.toUpperCase()}
+                  </button>
+                ))}
               </div>
             </div>
 
             {/* Copies */}
-            <div style={{ marginBottom: '1.5rem' }}>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-                Number of Copies: {settings.copies}
+            <div style={{ marginBottom: '2rem' }}>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#1f2937' }}>
+                Number of Copies: <span style={{ color: '#667eea', fontWeight: '900' }}>{settings.copies}</span>
               </label>
               <input
                 type="range"
                 min="1"
-                max="100"
+                max="10"
                 value={settings.copies}
                 onChange={(e) => setSettings({ ...settings, copies: parseInt(e.target.value) })}
-                style={{ width: '100%' }}
+                style={{
+                  width: '100%',
+                  height: '8px',
+                  borderRadius: '4px',
+                  outline: 'none',
+                  accentColor: '#667eea',
+                }}
               />
             </div>
 
-            {/* Paper Size */}
-            <div style={{ marginBottom: '1.5rem' }}>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-                Paper Size
-              </label>
-              <select
-                value={settings.paperSize}
-                onChange={(e) => setSettings({ ...settings, paperSize: e.target.value as any })}
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #ddd',
-                  borderRadius: '4px',
-                  fontSize: '1rem',
-                }}
-              >
-                <option value="a4">A4</option>
-                <option value="letter">Letter</option>
-                <option value="a3">A3</option>
-              </select>
-            </div>
-
             {/* Duplex */}
-            <div style={{ marginBottom: '1.5rem' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <input
-                  type="checkbox"
-                  checked={settings.duplex}
-                  onChange={(e) => setSettings({ ...settings, duplex: e.target.checked })}
-                />
-                Double-sided (Duplex)
+            <div style={{ marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <input
+                type="checkbox"
+                checked={settings.duplex}
+                onChange={(e) => setSettings({ ...settings, duplex: e.target.checked })}
+                style={{ width: '20px', height: '20px', cursor: 'pointer', accentColor: '#667eea' }}
+              />
+              <label style={{ fontWeight: '600', color: '#1f2937', cursor: 'pointer' }}>
+                📄 Double-sided (Duplex)
               </label>
-            </div>
-
-            {/* Price Display */}
-            <div style={{
-              backgroundColor: '#f8f9fa',
-              padding: '1rem',
-              borderRadius: '4px',
-              marginBottom: '1.5rem',
-              textAlign: 'center',
-            }}>
-              <p style={{ marginBottom: '0.5rem', color: '#666' }}>Estimated Price</p>
-              <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#007bff' }}>
-                ₹{displayPrice}
-              </p>
             </div>
 
             {/* Error Message */}
-            {error && <div className="alert alert-danger">{error}</div>}
+            {error && (
+              <div style={{
+                padding: '1rem',
+                backgroundColor: '#fee2e2',
+                borderRadius: '8px',
+                color: '#991b1b',
+                marginBottom: '1.5rem',
+              }}>
+                ⚠️ {error}
+              </div>
+            )}
 
-            {/* Navigation Buttons */}
-            <div style={{ display: 'flex', gap: '1rem' }}>
+            {/* Navigation */}
+            <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
               <button
                 onClick={() => setStep(1)}
-                className="btn btn-secondary"
-                style={{ flex: 1 }}
+                style={{
+                  flex: 1,
+                  padding: '0.875rem',
+                  backgroundColor: '#f3f4f6',
+                  color: '#667eea',
+                  border: '2px solid #667eea',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                  fontSize: '1rem',
+                }}
               >
                 ← Back
               </button>
               <button
                 onClick={() => setStep(3)}
-                className="btn btn-primary"
-                style={{ flex: 1 }}
+                style={{
+                  flex: 1,
+                  padding: '0.875rem',
+                  backgroundColor: '#667eea',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                  fontSize: '1rem',
+                }}
               >
-                Next: Payment →
+                Continue to Payment →
               </button>
             </div>
           </div>
@@ -457,63 +526,145 @@ export default function UploadPage() {
 
         {/* Step 3: Payment */}
         {step === 3 && (
-          <div>
-            <h2>Step 3: Payment</h2>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '16px',
+            padding: '2rem',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+            maxWidth: '600px',
+            margin: '0 auto',
+          }}>
+            <h2 style={{ fontSize: '1.5rem', marginBottom: '2rem', color: '#1f2937' }}>
+              💳 Payment & Review
+            </h2>
 
+            {/* Order Summary */}
             <div style={{
-              backgroundColor: '#f8f9fa',
+              backgroundColor: '#f9fafb',
+              borderRadius: '12px',
               padding: '1.5rem',
-              borderRadius: '8px',
-              marginBottom: '1.5rem',
+              marginBottom: '2rem',
+              border: '1px solid #e5e7eb',
             }}>
-              <h4 style={{ marginTop: 0 }}>Order Summary</h4>
-              <p><strong>Files:</strong> {uploadedFiles.length} files</p>
-              <p><strong>Color:</strong> {settings.colorMode === 'color' ? 'Color' : 'Black & White'}</p>
-              <p><strong>Copies:</strong> {settings.copies}</p>
-              <p><strong>Paper Size:</strong> {settings.paperSize.toUpperCase()}</p>
-              <p><strong>Duplex:</strong> {settings.duplex ? 'Yes' : 'No'}</p>
-              <hr />
-              <p style={{ fontSize: '1.3rem', fontWeight: 'bold', color: '#007bff' }}>
-                Total: ₹{displayPrice}
-              </p>
+              <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '1rem', color: '#1f2937' }}>
+                Order Summary
+              </h3>
+              <div style={{ fontSize: '0.875rem', color: '#6b7280', lineHeight: '1.8' }}>
+                <p style={{ margin: '0.5rem 0', display: 'flex', justifyContent: 'space-between' }}>
+                  <span>Files:</span>
+                  <span style={{ fontWeight: '600', color: '#1f2937' }}>{uploadedFiles.length}</span>
+                </p>
+                <p style={{ margin: '0.5rem 0', display: 'flex', justifyContent: 'space-between' }}>
+                  <span>Color Mode:</span>
+                  <span style={{ fontWeight: '600', color: '#1f2937' }}>
+                    {settings.colorMode === 'color' ? '🌈 Color' : '⚪ B&W'}
+                  </span>
+                </p>
+                <p style={{ margin: '0.5rem 0', display: 'flex', justifyContent: 'space-between' }}>
+                  <span>Copies:</span>
+                  <span style={{ fontWeight: '600', color: '#1f2937' }}>{settings.copies}x</span>
+                </p>
+                <p style={{ margin: '0.5rem 0', display: 'flex', justifyContent: 'space-between' }}>
+                  <span>Paper:</span>
+                  <span style={{ fontWeight: '600', color: '#1f2937' }}>{settings.paperSize.toUpperCase()}</span>
+                </p>
+              </div>
+
+              <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: '1rem', marginTop: '1rem' }}>
+                <p style={{ margin: 0, display: 'flex', justifyContent: 'space-between', fontSize: '1.125rem', fontWeight: '700' }}>
+                  <span>Total:</span>
+                  <span style={{ color: '#10b981' }}>₹{displayPrice}</span>
+                </p>
+              </div>
             </div>
 
             {/* Error Message */}
-            {error && <div className="alert alert-danger">{error}</div>}
+            {error && (
+              <div style={{
+                padding: '1rem',
+                backgroundColor: '#fee2e2',
+                borderRadius: '8px',
+                color: '#991b1b',
+                marginBottom: '1.5rem',
+              }}>
+                ⚠️ {error}
+              </div>
+            )}
 
-            {/* Payment Button */}
+            {/* Payment Methods */}
+            <div style={{ marginBottom: '2rem' }}>
+              <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '1rem', color: '#1f2937' }}>
+                Payment Method
+              </h3>
+              <div style={{
+                padding: '1rem',
+                border: '2px solid #667eea',
+                borderRadius: '12px',
+                backgroundColor: '#f0f4ff',
+                textAlign: 'center',
+              }}>
+                <p style={{ margin: 0, fontWeight: '600', color: '#667eea', fontSize: '1.125rem' }}>
+                  💳 Pay with Razorpay
+                </p>
+                <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.875rem', color: '#6b7280' }}>
+                  Card, UPI, Wallet & More
+                </p>
+              </div>
+            </div>
+
+            {/* Navigation */}
             <div style={{ display: 'flex', gap: '1rem' }}>
               <button
                 onClick={() => setStep(2)}
-                className="btn btn-secondary"
-                style={{ flex: 1 }}
-                disabled={loading}
+                style={{
+                  flex: 1,
+                  padding: '0.875rem',
+                  backgroundColor: '#f3f4f6',
+                  color: '#667eea',
+                  border: '2px solid #667eea',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                  fontSize: '1rem',
+                }}
               >
                 ← Back
               </button>
               <button
                 onClick={handlePayment}
-                className="btn btn-primary"
-                style={{ flex: 1, fontSize: '1.1rem' }}
                 disabled={loading}
+                style={{
+                  flex: 1,
+                  padding: '0.875rem',
+                  backgroundColor: loading ? '#9ca3af' : '#10b981',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  fontWeight: '600',
+                  fontSize: '1rem',
+                  opacity: loading ? 0.7 : 1,
+                }}
               >
-                {loading ? 'Processing...' : 'Pay ₹' + displayPrice}
+                {loading ? '⏳ Processing...' : '💳 Pay Now'}
               </button>
             </div>
-
-            <p style={{ textAlign: 'center', marginTop: '1rem', color: '#666', fontSize: '0.9rem' }}>
-              🔒 Payments are secure and handled by Razorpay
-            </p>
           </div>
         )}
-
-        {/* Footer Links */}
-        <div style={{ marginTop: '2rem', textAlign: 'center' }}>
-          <Link href="/" style={{ color: '#007bff', textDecoration: 'none' }}>
-            ← Back to Home
-          </Link>
-        </div>
       </div>
+
+      <style>{`
+        @keyframes slideUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
     </div>
   );
 }
