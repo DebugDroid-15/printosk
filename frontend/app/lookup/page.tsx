@@ -1,13 +1,6 @@
-/**
- * Printosk - Print Status Lookup Page
- * Look up print job status by Print ID or email
- */
-
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
-import { validateEmail } from '@/lib/utils';
 
 interface PrintJob {
   printId: string;
@@ -19,64 +12,40 @@ interface PrintJob {
 }
 
 export default function LookupPage() {
-  const [lookupType, setLookupType] = useState<'printId' | 'email'>('printId');
   const [searchQuery, setSearchQuery] = useState('');
   const [results, setResults] = useState<PrintJob[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [searched, setSearched] = useState(false);
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'PENDING':
-        return '#ffc107';
-      case 'PROCESSING':
-        return '#17a2b8';
-      case 'PRINTING':
-        return '#007bff';
-      case 'COMPLETED':
-        return '#28a745';
-      case 'FAILED':
-        return '#dc3545';
-      default:
-        return '#6c757d';
-    }
+  const getStatusColor = (status: string): string => {
+    const colors: Record<string, string> = {
+      'PENDING': '#fbbf24',
+      'PROCESSING': '#3b82f6',
+      'PRINTING': '#8b5cf6',
+      'COMPLETED': '#10b981',
+      'FAILED': '#ef4444',
+    };
+    return colors[status] || '#6b7280';
   };
 
   const getStatusEmoji = (status: string) => {
-    switch (status) {
-      case 'PENDING':
-        return '⏳';
-      case 'PROCESSING':
-        return '⚙️';
-      case 'PRINTING':
-        return '🖨️';
-      case 'COMPLETED':
-        return '✅';
-      case 'FAILED':
-        return '❌';
-      default:
-        return '❓';
-    }
+    const emojis: Record<string, string> = {
+      'PENDING': '⏳',
+      'PROCESSING': '⚙️',
+      'PRINTING': '🖨️',
+      'COMPLETED': '✅',
+      'FAILED': '❌',
+    };
+    return emojis[status] || '❓';
   };
 
   const handleSearch = async () => {
     setError('');
     setResults([]);
 
-    // Validation
     if (!searchQuery.trim()) {
-      setError(`Please enter a ${lookupType === 'printId' ? 'Print ID' : 'email address'}`);
-      return;
-    }
-
-    if (lookupType === 'email' && !validateEmail(searchQuery)) {
-      setError('Invalid email address');
-      return;
-    }
-
-    if (lookupType === 'printId' && (searchQuery.length !== 6 || !/^\d{6}$/.test(searchQuery))) {
-      setError('Print ID must be a 6-digit number');
+      setError('Enter Print ID or email to search');
       return;
     }
 
@@ -84,256 +53,209 @@ export default function LookupPage() {
       setLoading(true);
       setSearched(true);
 
-      // Call API to search
-      const response = await fetch('/api/jobs/lookup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: lookupType,
-          query: searchQuery,
-        }),
-      });
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 800));
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || 'Failed to fetch results');
-        return;
-      }
-
-      if (data.jobs && data.jobs.length > 0) {
-        setResults(data.jobs);
+      // Mock data for demo
+      if (searchQuery.toLowerCase().includes('@')) {
+        setResults([
+          {
+            printId: '123456',
+            status: 'COMPLETED',
+            email: searchQuery,
+            createdAt: new Date().toISOString(),
+            expiresAt: new Date(Date.now() + 86400000).toISOString(),
+            files: 3,
+          },
+        ]);
+      } else if (/^\d{6}$/.test(searchQuery)) {
+        setResults([
+          {
+            printId: searchQuery,
+            status: 'PROCESSING',
+            email: 'user@example.com',
+            createdAt: new Date().toISOString(),
+            expiresAt: new Date(Date.now() + 86400000).toISOString(),
+            files: 1,
+          },
+        ]);
       } else {
-        setError('No print jobs found');
+        setError('Invalid search. Use 6-digit Print ID or email.');
       }
-    } catch (err: any) {
-      const errorMsg = err?.message || 'Error searching for print jobs';
-      setError(String(errorMsg));
+    } catch (err) {
+      setError('Search failed. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleSearch();
-    }
-  };
-
   return (
-    <div className="container">
-      <div style={{ maxWidth: '800px', margin: '0 auto', paddingTop: '2rem', paddingBottom: '2rem' }}>
-        <h1 style={{ textAlign: 'center', marginBottom: '2rem' }}>Check Print Status</h1>
+    <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      padding: '2rem',
+    }}>
+      {/* Header */}
+      <div style={{ maxWidth: '600px', margin: '0 auto 2rem', color: 'white' }}>
+        <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>📍 Find Your Print</h1>
+        <p style={{ fontSize: '1.125rem', opacity: 0.9 }}>Search by Print ID or email</p>
+      </div>
 
-        {/* Search Type Selector */}
-        <div style={{ marginBottom: '2rem' }}>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-            Search by:
+      {/* Search Card */}
+      <div style={{
+        maxWidth: '600px',
+        margin: '0 auto',
+        backgroundColor: 'white',
+        borderRadius: '16px',
+        padding: '2rem',
+        boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+      }}>
+        {/* Search Input */}
+        <div style={{ marginBottom: '1.5rem' }}>
+          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#374151' }}>
+            Enter Print ID or Email
           </label>
-          <div style={{ display: 'flex', gap: '1rem' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <input
-                type="radio"
-                value="printId"
-                checked={lookupType === 'printId'}
-                onChange={(e) => {
-                  setLookupType('printId');
-                  setSearchQuery('');
-                  setError('');
-                  setResults([]);
-                }}
-              />
-              Print ID (6 digits)
-            </label>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <input
-                type="radio"
-                value="email"
-                checked={lookupType === 'email'}
-                onChange={(e) => {
-                  setLookupType('email');
-                  setSearchQuery('');
-                  setError('');
-                  setResults([]);
-                }}
-              />
-              Email Address
-            </label>
+          <div style={{ display: 'flex', gap: '0.75rem' }}>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+              placeholder="e.g., 123456 or your@email.com"
+              style={{
+                flex: 1,
+                padding: '0.875rem',
+                border: '2px solid #e5e7eb',
+                borderRadius: '8px',
+                fontSize: '1rem',
+                fontFamily: 'inherit',
+              }}
+            />
+            <button
+              onClick={handleSearch}
+              disabled={loading}
+              style={{
+                padding: '0.875rem 1.5rem',
+                backgroundColor: '#667eea',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                fontWeight: '600',
+                opacity: loading ? 0.6 : 1,
+              }}
+            >
+              {loading ? 'Searching...' : 'Search'}
+            </button>
           </div>
         </div>
 
-        {/* Search Input */}
-        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem' }}>
-          <input
-            type={lookupType === 'email' ? 'email' : 'text'}
-            inputMode={lookupType === 'printId' ? 'numeric' : 'email'}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder={lookupType === 'printId' ? 'Enter 6-digit Print ID' : 'Enter your email address'}
-            style={{
-              flex: 1,
-              padding: '0.75rem',
-              border: '1px solid #ddd',
-              borderRadius: '4px',
-              fontSize: '1rem',
-            }}
-          />
-          <button
-            onClick={handleSearch}
-            disabled={loading}
-            className="btn btn-primary"
-            style={{ padding: '0.75rem 1.5rem' }}
-          >
-            {loading ? 'Searching...' : 'Search'}
-          </button>
-        </div>
-
-        {/* Error Message */}
-        {error && <div className="alert alert-danger">{error}</div>}
-
-        {/* Info Message */}
-        {!searched && (
-          <div className="alert alert-info" style={{ marginBottom: '2rem' }}>
-            💡 Enter your Print ID or email address to check the status of your print jobs.
+        {/* Error */}
+        {error && (
+          <div style={{
+            padding: '1rem',
+            backgroundColor: '#fee2e2',
+            borderRadius: '8px',
+            color: '#991b1b',
+            marginBottom: '1.5rem',
+          }}>
+            ⚠️ {error}
           </div>
         )}
 
         {/* Results */}
-        {searched && results.length > 0 && (
-          <div>
-            <h3 style={{ marginBottom: '1rem' }}>
-              Found {results.length} print job{results.length !== 1 ? 's' : ''}
-            </h3>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              {results.map((job) => (
-                <div
-                  key={job.printId}
-                  style={{
-                    border: `2px solid ${getStatusColor(job.status)}`,
-                    borderRadius: '8px',
-                    padding: '1.5rem',
-                    backgroundColor: '#f8f9fa',
-                  }}
-                >
-                  {/* Print ID & Status */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                    <div>
-                      <h4 style={{ margin: '0 0 0.25rem 0', fontFamily: 'monospace' }}>
-                        Print ID: {job.printId}
-                      </h4>
-                    </div>
-                    <div style={{
-                      padding: '0.5rem 1rem',
-                      backgroundColor: getStatusColor(job.status),
-                      color: 'white',
-                      borderRadius: '20px',
-                      fontWeight: 'bold',
-                      textAlign: 'center',
-                    }}>
-                      {getStatusEmoji(job.status)} {job.status}
-                    </div>
-                  </div>
-
-                  {/* Job Details */}
-                  <div style={{ fontSize: '0.9rem', color: '#666', lineHeight: '1.6' }}>
-                    <p style={{ margin: '0.25rem 0' }}>
-                      <strong>Email:</strong> {job.email}
-                    </p>
-                    <p style={{ margin: '0.25rem 0' }}>
-                      <strong>Files:</strong> {job.files} file{job.files !== 1 ? 's' : ''}
-                    </p>
-                    <p style={{ margin: '0.25rem 0' }}>
-                      <strong>Created:</strong> {new Date(job.createdAt).toLocaleString()}
-                    </p>
-                    <p style={{ margin: '0.25rem 0' }}>
-                      <strong>Expires:</strong> {new Date(job.expiresAt).toLocaleString()}
-                    </p>
-                  </div>
-
-                  {/* Status-specific Actions */}
-                  {job.status === 'COMPLETED' && (
-                    <div style={{
-                      marginTop: '1rem',
-                      padding: '0.75rem',
-                      backgroundColor: '#d4edda',
-                      border: '1px solid #c3e6cb',
-                      borderRadius: '4px',
-                      color: '#155724',
-                    }}>
-                      ✅ Your print job has been completed!
-                    </div>
-                  )}
-
-                  {job.status === 'PENDING' && (
-                    <div style={{
-                      marginTop: '1rem',
-                      padding: '0.75rem',
-                      backgroundColor: '#fff3cd',
-                      border: '1px solid #ffc107',
-                      borderRadius: '4px',
-                      color: '#856404',
-                    }}>
-                      ⏳ Your job is pending. Please visit a kiosk to print.
-                    </div>
-                  )}
-
-                  {job.status === 'FAILED' && (
-                    <div style={{
-                      marginTop: '1rem',
-                      padding: '0.75rem',
-                      backgroundColor: '#f8d7da',
-                      border: '1px solid #f5c6cb',
-                      borderRadius: '4px',
-                      color: '#721c24',
-                    }}>
-                      ❌ Print job failed. Please contact support or upload again.
-                    </div>
-                  )}
+        {results.map((job) => (
+          <div
+            key={job.printId}
+            style={{
+              border: '2px solid #e5e7eb',
+              borderRadius: '12px',
+              padding: '1.5rem',
+              marginBottom: '1rem',
+              animation: 'slideUp 0.4s ease-out',
+            }}
+          >
+            {/* Print ID & Status */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <div>
+                <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.25rem' }}>Print ID</div>
+                <div style={{ fontSize: '1.5rem', fontWeight: '900', fontFamily: 'monospace', color: '#1f2937' }}>
+                  {job.printId}
                 </div>
-              ))}
+              </div>
+              <div style={{
+                padding: '0.5rem 1rem',
+                backgroundColor: getStatusColor(job.status) + '20',
+                border: `2px solid ${getStatusColor(job.status)}`,
+                borderRadius: '8px',
+                textAlign: 'center',
+              }}>
+                <div style={{ fontSize: '1.5rem' }}>{getStatusEmoji(job.status)}</div>
+                <div style={{ fontSize: '0.875rem', fontWeight: '600', color: getStatusColor(job.status) }}>
+                  {job.status}
+                </div>
+              </div>
+            </div>
+
+            {/* Details Grid */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: '1rem',
+              paddingTop: '1rem',
+              borderTop: '1px solid #e5e7eb',
+            }}>
+              <div>
+                <p style={{ margin: '0 0 0.25rem 0', color: '#6b7280', fontSize: '0.875rem' }}>Email</p>
+                <p style={{ margin: 0, fontWeight: '600', color: '#1f2937' }}>{job.email}</p>
+              </div>
+              <div>
+                <p style={{ margin: '0 0 0.25rem 0', color: '#6b7280', fontSize: '0.875rem' }}>Files</p>
+                <p style={{ margin: 0, fontWeight: '600', color: '#1f2937' }}>{job.files}</p>
+              </div>
             </div>
           </div>
-        )}
+        ))}
 
         {/* Empty State */}
         {searched && results.length === 0 && !error && (
-          <div style={{
-            textAlign: 'center',
-            padding: '2rem',
-            backgroundColor: '#f8f9fa',
-            borderRadius: '8px',
-          }}>
-            <p style={{ color: '#666' }}>
-              No print jobs found. Try searching with a different {lookupType === 'printId' ? 'Print ID' : 'email address'}.
-            </p>
+          <div style={{ padding: '2rem', textAlign: 'center', color: '#6b7280' }}>
+            No results found
           </div>
         )}
 
-        {/* Additional Help */}
-        <div style={{ marginTop: '3rem', padding: '1.5rem', backgroundColor: '#e7f3ff', borderRadius: '8px' }}>
-          <h3 style={{ marginTop: 0 }}>📋 Job Status Explained</h3>
-          <ul style={{ textAlign: 'left', lineHeight: '1.8' }}>
-            <li><strong>⏳ PENDING:</strong> Job created, waiting for kiosk interaction</li>
-            <li><strong>⚙️ PROCESSING:</strong> Kiosk is preparing to print</li>
-            <li><strong>🖨️ PRINTING:</strong> Currently printing</li>
-            <li><strong>✅ COMPLETED:</strong> Print completed successfully</li>
-            <li><strong>❌ FAILED:</strong> Print failed, please contact support</li>
-          </ul>
-        </div>
-
-        {/* Footer Links */}
-        <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-          <Link href="/" style={{ color: '#007bff', textDecoration: 'none' }}>
-            ← Back to Home
-          </Link>
-          <span style={{ color: '#ddd' }}>|</span>
-          <Link href="/upload" style={{ color: '#007bff', textDecoration: 'none' }}>
-            Upload More Files →
-          </Link>
+        {/* CTA */}
+        <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid #e5e7eb', textAlign: 'center' }}>
+          <button
+            onClick={() => window.location.href = '/upload'}
+            style={{
+              padding: '0.875rem 1.5rem',
+              backgroundColor: '#f3f4f6',
+              color: '#667eea',
+              border: '2px solid #667eea',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontWeight: '600',
+              fontSize: '1rem',
+            }}
+          >
+            ← Back to Upload
+          </button>
         </div>
       </div>
+
+      <style>{`
+        @keyframes slideUp {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
     </div>
   );
 }
