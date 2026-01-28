@@ -27,8 +27,8 @@ export function Navbar() {
           border: 'none',
           cursor: 'pointer',
           transition: 'transform 0.2s ease',
-          height: '50px',
-          padding: 0,
+          height: '60px',
+          padding: '0 0.5rem',
         }}
         onMouseEnter={(e) => {
           const el = e.currentTarget as HTMLElement;
@@ -42,9 +42,10 @@ export function Navbar() {
         <Image
           src="/images/logo.svg"
           alt="Printosk Logo"
-          width={200}
-          height={50}
-          style={{ objectFit: 'contain', height: '50px', width: 'auto' }}
+          width={180}
+          height={60}
+          priority
+          style={{ height: 'auto', width: 'auto', maxHeight: '60px', maxWidth: '180px', objectFit: 'contain' }}
         />
       </button>
 
