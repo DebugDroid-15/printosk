@@ -95,6 +95,24 @@ export async function POST(request: NextRequest) {
               created_at: new Date().toISOString(),
             }]);
 
+          // Record files
+          if (body.files && body.files.length > 0) {
+            const fileRecords = body.files.map((file: any) => ({
+              job_id: jobResult.data.id,
+              file_name: file.name,
+              file_size: file.size,
+              file_type: file.name.split('.').pop()?.toLowerCase() || 'unknown',
+              storage_path: `jobs/${jobResult.data.id}/${file.name}`,
+              created_at: new Date().toISOString(),
+            }));
+
+            await supabase
+              .from('print_files')
+              .insert(fileRecords);
+
+            console.log('[MOCK MODE] Files recorded:', { count: body.files.length, printId });
+          }
+
           console.log('[MOCK MODE] Print job created:', { printId, email: body.email });
         }
       } catch (dbError) {
@@ -171,6 +189,24 @@ export async function POST(request: NextRequest) {
             status: 'COMPLETED',
             created_at: new Date().toISOString(),
           }]);
+
+        // Record files
+        if (body.files && body.files.length > 0) {
+          const fileRecords = body.files.map((file: any) => ({
+            job_id: jobResult.data.id,
+            file_name: file.name,
+            file_size: file.size,
+            file_type: file.name.split('.').pop()?.toLowerCase() || 'unknown',
+            storage_path: `jobs/${jobResult.data.id}/${file.name}`,
+            created_at: new Date().toISOString(),
+          }));
+
+          await supabase
+            .from('print_files')
+            .insert(fileRecords);
+
+          console.log('Files recorded:', { count: body.files.length, printId });
+        }
       }
 
       console.log('Payment verified successfully', {
