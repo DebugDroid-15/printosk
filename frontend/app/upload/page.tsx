@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import { Navbar } from '@/components/Navbar';
 import { loadRazorpayScript, openRazorpayCheckout, createRazorpayOrder } from '@/lib/razorpay';
 import { validateEmail, validateFile, formatFileSize } from '@/lib/utils';
+import { countPdfPages, calculatePrice, getPriceDescription, DEFAULT_PRICING } from '@/lib/pdfUtils';
 
 interface PrintSettings {
   colorMode: 'color' | 'bw';
@@ -16,6 +17,8 @@ interface UploadedFile {
   file: File;
   name: string;
   size: string;
+  pageCount?: number;
+  isLoading?: boolean;
 }
 
 export default function UploadPage() {
@@ -35,7 +38,7 @@ export default function UploadPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Step 1: Handle file upload
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
 
@@ -51,12 +54,48 @@ export default function UploadPage() {
         file,
         name: file.name,
         size: formatFileSize(file.size),
+        isLoading: true,
+        pageCount: undefined,
       });
     }
 
     setUploadedFiles([...uploadedFiles, ...newFiles]);
     setError('');
     if (fileInputRef.current) fileInputRef.current.value = '';
+
+    // Extract page counts for PDF files
+    for (let i = 0; i < newFiles.length; i++) {
+      const file = newFiles[i];
+      if (file.name.toLowerCase().endsWith('.pdf')) {
+        try {
+          const pageCount = await countPdfPages(file.file);
+          setUploadedFiles((prev) =>
+            prev.map((f) =>
+              f.file === file.file
+                ? { ...f, pageCount, isLoading: false }
+                : f
+            )
+          );
+        } catch (err) {
+          console.error(`Failed to read ${file.name}:`, err);
+          setUploadedFiles((prev) =>
+            prev.map((f) =>
+              f.file === file.file
+                ? { ...f, isLoading: false, pageCount: 0 }
+                : f
+            )
+          );
+        }
+      } else {
+        setUploadedFiles((prev) =>
+          prev.map((f) =>
+            f.file === file.file
+              ? { ...f, isLoading: false }
+              : f
+          )
+        );
+      }
+    }
   };
 
   const removeFile = (index: number) => {
@@ -81,12 +120,23 @@ export default function UploadPage() {
     setStep(2);
   };
 
-  // Step 3: Calculate price and initiate payment
-  const calculatePrice = () => {
-    const basePrice = uploadedFiles.length * 5 * 100; // ₹5 per file in paise
-    const colorMultiplier = settings.colorMode === 'color' ? 2 : 1;
-    const copiesMultiplier = settings.copies;
-    return basePrice * colorMultiplier * copiesMultiplier;
+  // Step 3: Calculate total price based on page counts
+  const calculateTotalPrice = (): number => {
+    let totalPaise = 0;
+
+    for (const uploadedFile of uploadedFiles) {
+      let pageCount = uploadedFile.pageCount || 1; // Default to 1 page if not PDF
+      const priceInRupees = calculatePrice(
+        pageCount,
+        settings.colorMode,
+        settings.duplex,
+        settings.copies,
+        DEFAULT_PRICING
+      );
+      totalPaise += Math.round(priceInRupees * 100);
+    }
+
+    return totalPaise;
   };
 
   const handlePayment = async () => {
@@ -101,9 +151,10 @@ export default function UploadPage() {
         return;
       }
 
-      const amount = calculatePrice();
+      const amount = calculateTotalPrice();
+      const totalPages = uploadedFiles.reduce((sum, f) => sum + (f.pageCount || 1), 0);
       const receipt = `order_${Date.now()}`;
-      const description = `${uploadedFiles.length} files - ${settings.colorMode} - ${settings.copies} copies`;
+      const description = `${uploadedFiles.length} files (${totalPages} pages) - ${settings.colorMode} - ${settings.copies} copies`;
 
       // Create order
       const orderResponse = await createRazorpayOrder(amount, receipt, description);
@@ -131,8 +182,9 @@ export default function UploadPage() {
                 signature,
                 email,
                 phone,
-                files: uploadedFiles.map(f => ({ name: f.name, size: f.file.size })),
+                files: uploadedFiles.map(f => ({ name: f.name, size: f.file.size, pageCount: f.pageCount || 1 })),
                 settings,
+                amount,
               }),
             });
 
@@ -161,8 +213,9 @@ export default function UploadPage() {
     }
   };
 
-  const totalPrice = calculatePrice();
+  const totalPrice = calculateTotalPrice();
   const displayPrice = (totalPrice / 100).toFixed(2);
+  const totalPages = uploadedFiles.reduce((sum, f) => sum + (f.pageCount || 1), 0);
 
   return (
     <div style={{
@@ -328,44 +381,63 @@ export default function UploadPage() {
                     📋 Files ({uploadedFiles.length})
                   </h3>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '300px', overflowY: 'auto' }}>
-                    {uploadedFiles.map((file, index) => (
-                      <div
-                        key={index}
-                        style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          padding: '0.875rem',
-                          backgroundColor: '#f9fafb',
-                          borderRadius: '8px',
-                          border: '1px solid #e5e7eb',
-                        }}
-                      >
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <p style={{ margin: '0 0 0.25rem 0', fontWeight: '600', color: '#1f2937', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            {file.name}
-                          </p>
-                          <p style={{ margin: 0, fontSize: '0.875rem', color: '#6b7280' }}>
-                            {file.size}
-                          </p>
-                        </div>
-                        <button
-                          onClick={() => removeFile(index)}
+                    {uploadedFiles.map((file, index) => {
+                      const filePriceInRupees = file.pageCount
+                        ? calculatePrice(
+                            file.pageCount,
+                            settings.colorMode,
+                            settings.duplex,
+                            settings.copies,
+                            DEFAULT_PRICING
+                          )
+                        : 0;
+                      return (
+                        <div
+                          key={index}
                           style={{
-                            padding: '0.5rem 0.75rem',
-                            backgroundColor: '#fee2e2',
-                            color: '#991b1b',
-                            border: 'none',
-                            borderRadius: '6px',
-                            cursor: 'pointer',
-                            fontWeight: '600',
-                            marginLeft: '0.75rem',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            padding: '0.875rem',
+                            backgroundColor: '#f9fafb',
+                            borderRadius: '8px',
+                            border: '1px solid #e5e7eb',
                           }}
                         >
-                          Remove
-                        </button>
-                      </div>
-                    ))}
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <p style={{ margin: '0 0 0.25rem 0', fontWeight: '600', color: '#1f2937', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {file.name}
+                            </p>
+                            <p style={{ margin: 0, fontSize: '0.875rem', color: '#6b7280' }}>
+                              {file.size}
+                              {file.isLoading && (' - Reading...')}
+                              {!file.isLoading && file.pageCount && (` - ${file.pageCount} pages`)}
+                              {!file.isLoading && !file.pageCount && file.name.toLowerCase().endsWith('.pdf') && (' - No pages found')}
+                            </p>
+                            {file.pageCount && (
+                              <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.75rem', color: '#667eea', fontWeight: '500' }}>
+                                ₹{filePriceInRupees.toFixed(2)} ({settings.copies} copy × {file.pageCount} pages)
+                              </p>
+                            )}
+                          </div>
+                          <button
+                            onClick={() => removeFile(index)}
+                            style={{
+                              padding: '0.5rem 0.75rem',
+                              backgroundColor: '#fee2e2',
+                              color: '#991b1b',
+                              border: 'none',
+                              borderRadius: '6px',
+                              cursor: 'pointer',
+                              fontWeight: '600',
+                              marginLeft: '0.75rem',
+                            }}
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -558,9 +630,19 @@ export default function UploadPage() {
                   <span style={{ fontWeight: '600', color: '#1f2937' }}>{uploadedFiles.length}</span>
                 </p>
                 <p style={{ margin: '0.5rem 0', display: 'flex', justifyContent: 'space-between' }}>
+                  <span>Total Pages:</span>
+                  <span style={{ fontWeight: '600', color: '#1f2937' }}>{totalPages}</span>
+                </p>
+                <p style={{ margin: '0.5rem 0', display: 'flex', justifyContent: 'space-between' }}>
                   <span>Color Mode:</span>
                   <span style={{ fontWeight: '600', color: '#1f2937' }}>
                     {settings.colorMode === 'color' ? '🌈 Color' : '⚪ B&W'}
+                  </span>
+                </p>
+                <p style={{ margin: '0.5rem 0', display: 'flex', justifyContent: 'space-between' }}>
+                  <span>Duplex:</span>
+                  <span style={{ fontWeight: '600', color: '#1f2937' }}>
+                    {settings.duplex ? '📄📄 Double-sided' : '📄 Single-sided'}
                   </span>
                 </p>
                 <p style={{ margin: '0.5rem 0', display: 'flex', justifyContent: 'space-between' }}>
@@ -570,6 +652,9 @@ export default function UploadPage() {
                 <p style={{ margin: '0.5rem 0', display: 'flex', justifyContent: 'space-between' }}>
                   <span>Paper:</span>
                   <span style={{ fontWeight: '600', color: '#1f2937' }}>{settings.paperSize.toUpperCase()}</span>
+                </p>
+                <p style={{ margin: '0.5rem 0', display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#6b7280' }}>
+                  <span>{getPriceDescription(settings.colorMode, settings.duplex)}</span>
                 </p>
               </div>
 

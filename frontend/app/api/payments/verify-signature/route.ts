@@ -15,13 +15,14 @@ interface VerifyRequest {
   signature: string;
   email: string;
   phone?: string;
-  files: Array<{ name: string; size: number }>;
+  files: Array<{ name: string; size: number; pageCount?: number }>;
   settings: {
     colorMode: 'color' | 'bw';
     copies: number;
     paperSize: 'a4' | 'letter' | 'a3';
     duplex: boolean;
   };
+  amount?: number;
 }
 
 // Helper function to generate unique 6-digit Print ID
@@ -74,7 +75,7 @@ export async function POST(request: NextRequest) {
             paper_size: body.settings.paperSize.toUpperCase(),
             duplex_mode: body.settings.duplex ? 'LONG_EDGE' : 'NONE',
             copies: body.settings.copies,
-            total_amount: 0, // You can calculate this based on file count and settings
+            total_amount: body.amount ? Math.round(body.amount / 100) : 0,
             currency: 'INR',
             expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
           }])
@@ -103,6 +104,7 @@ export async function POST(request: NextRequest) {
               file_size: file.size,
               file_type: file.name.split('.').pop()?.toLowerCase() || 'unknown',
               storage_path: `jobs/${jobResult.data.id}/${file.name}`,
+              page_count: file.pageCount || null,
               created_at: new Date().toISOString(),
             }));
 
@@ -110,10 +112,10 @@ export async function POST(request: NextRequest) {
               .from('print_files')
               .insert(fileRecords);
 
-            console.log('[MOCK MODE] Files recorded:', { count: body.files.length, printId });
+            console.log('[MOCK MODE] Files recorded:', { count: body.files.length, printId, totalPages: body.files.reduce((sum: number, f: any) => sum + (f.pageCount || 0), 0) });
           }
 
-          console.log('[MOCK MODE] Print job created:', { printId, email: body.email });
+          console.log('[MOCK MODE] Print job created:', { printId, email: body.email, amount: body.amount });
         }
       } catch (dbError) {
         console.error('Database error in mock mode:', dbError);
@@ -169,7 +171,7 @@ export async function POST(request: NextRequest) {
           paper_size: body.settings.paperSize.toUpperCase(),
           duplex_mode: body.settings.duplex ? 'LONG_EDGE' : 'NONE',
           copies: body.settings.copies,
-          total_amount: 0,
+          total_amount: body.amount ? Math.round(body.amount / 100) : 0,
           currency: 'INR',
           expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
         }])
@@ -198,6 +200,7 @@ export async function POST(request: NextRequest) {
             file_size: file.size,
             file_type: file.name.split('.').pop()?.toLowerCase() || 'unknown',
             storage_path: `jobs/${jobResult.data.id}/${file.name}`,
+            page_count: file.pageCount || null,
             created_at: new Date().toISOString(),
           }));
 
@@ -205,7 +208,7 @@ export async function POST(request: NextRequest) {
             .from('print_files')
             .insert(fileRecords);
 
-          console.log('Files recorded:', { count: body.files.length, printId });
+          console.log('Files recorded:', { count: body.files.length, printId, totalPages: body.files.reduce((sum: number, f: any) => sum + (f.pageCount || 0), 0) });
         }
       }
 
