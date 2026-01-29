@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
+import dynamic from 'next/dynamic';
 import { Navbar } from '@/components/Navbar';
 import { loadRazorpayScript, openRazorpayCheckout, createRazorpayOrder } from '@/lib/razorpay';
 import { validateEmail, validateFile, formatFileSize } from '@/lib/utils';
-import { countPdfPages, calculatePrice, getPriceDescription, DEFAULT_PRICING } from '@/lib/pdfUtils';
 
 interface PrintSettings {
   colorMode: 'color' | 'bw';
@@ -37,10 +37,27 @@ export default function UploadPage() {
   const [error, setError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Store PDF utilities (lazy loaded on client)
+  const [pdfUtils, setPdfUtils] = useState<any>(null);
+
+  // Initialize PDF utilities on client
+  React.useEffect(() => {
+    import('@/lib/pdfUtils').then(utils => {
+      setPdfUtils(utils);
+    }).catch(err => {
+      console.error('Failed to load PDF utils:', err);
+    });
+  }, []);
+
   // Step 1: Handle file upload
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
+
+    if (!pdfUtils) {
+      setError('PDF utilities not ready. Please try again.');
+      return;
+    }
 
     const newFiles: UploadedFile[] = [];
     for (let i = 0; i < files.length; i++) {
@@ -68,7 +85,7 @@ export default function UploadPage() {
       const file = newFiles[i];
       if (file.name.toLowerCase().endsWith('.pdf')) {
         try {
-          const pageCount = await countPdfPages(file.file);
+          const pageCount = await pdfUtils.countPdfPages(file.file);
           setUploadedFiles((prev) =>
             prev.map((f) =>
               f.file === file.file
@@ -122,16 +139,18 @@ export default function UploadPage() {
 
   // Step 3: Calculate total price based on page counts
   const calculateTotalPrice = (): number => {
+    if (!pdfUtils) return 0;
+
     let totalPaise = 0;
 
     for (const uploadedFile of uploadedFiles) {
       let pageCount = uploadedFile.pageCount || 1; // Default to 1 page if not PDF
-      const priceInRupees = calculatePrice(
+      const priceInRupees = pdfUtils.calculatePrice(
         pageCount,
         settings.colorMode,
         settings.duplex,
         settings.copies,
-        DEFAULT_PRICING
+        pdfUtils.DEFAULT_PRICING
       );
       totalPaise += Math.round(priceInRupees * 100);
     }
@@ -382,13 +401,13 @@ export default function UploadPage() {
                   </h3>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '300px', overflowY: 'auto' }}>
                     {uploadedFiles.map((file, index) => {
-                      const filePriceInRupees = file.pageCount
-                        ? calculatePrice(
+                      const filePriceInRupees = file.pageCount && pdfUtils
+                        ? pdfUtils.calculatePrice(
                             file.pageCount,
                             settings.colorMode,
                             settings.duplex,
                             settings.copies,
-                            DEFAULT_PRICING
+                            pdfUtils.DEFAULT_PRICING
                           )
                         : 0;
                       return (
@@ -654,7 +673,7 @@ export default function UploadPage() {
                   <span style={{ fontWeight: '600', color: '#1f2937' }}>{settings.paperSize.toUpperCase()}</span>
                 </p>
                 <p style={{ margin: '0.5rem 0', display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#6b7280' }}>
-                  <span>{getPriceDescription(settings.colorMode, settings.duplex)}</span>
+                  <span>{pdfUtils ? pdfUtils.getPriceDescription(settings.colorMode, settings.duplex) : 'Loading pricing...'}</span>
                 </p>
               </div>
 
