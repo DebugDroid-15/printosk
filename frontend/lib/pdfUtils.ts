@@ -27,52 +27,83 @@ export const DEFAULT_PRICING: PriceConfig = {
 };
 
 /**
+ * Extract page count from PDF by parsing the PDF structure
+ * This works without a worker thread
+ */
+function extractPageCountFromPdfBytes(uint8Array: Uint8Array): number {
+  try {
+    const pdfText = new TextDecoder().decode(uint8Array);
+    
+    // Method 1: Look for /Pages and /Count
+    const pagesMatch = pdfText.match(/\/Pages\s*(\d+)\s*0\s*R/);
+    if (pagesMatch) {
+      const pagesObjNum = pagesMatch[1];
+      // Find the pages object
+      const regex = new RegExp(`${pagesObjNum}\\s*0\\s*obj[^>]*?/Count\\s*(\\d+)`, 's');
+      const countMatch = pdfText.match(regex);
+      if (countMatch) {
+        const pageCount = parseInt(countMatch[1], 10);
+        if (pageCount > 0) {
+          console.log(`[PDF] Extracted page count from /Count: ${pageCount}`);
+          return pageCount;
+        }
+      }
+    }
+    
+    // Method 2: Count /Type /Page objects
+    const pageObjects = pdfText.match(/\/Type\s*\/Page\s*[^/]*(\/Parent|>>)/g) || [];
+    if (pageObjects.length > 0) {
+      console.log(`[PDF] Counted /Type /Page objects: ${pageObjects.length}`);
+      return pageObjects.length;
+    }
+    
+    return 1;
+  } catch (e) {
+    console.error('[PDF] Error extracting page count from bytes:', e);
+    return 1;
+  }
+}
+
+/**
  * Count the number of pages in a PDF file
  */
 export async function countPdfPages(file: File): Promise<number> {
   try {
     const arrayBuffer = await file.arrayBuffer();
+    const uint8Array = new Uint8Array(arrayBuffer);
     console.log(`[PDF] Counting pages for ${file.name}, size: ${arrayBuffer.byteLength} bytes`);
     
-    // Try to parse the PDF
-    const loadingTask = pdfjsLib.getDocument({ 
-      data: new Uint8Array(arrayBuffer),
-      disableAutoFetch: false,
-      disableStream: false,
-      disableRange: false,
-    });
-    
-    const pdf = await loadingTask.promise;
-    const pageCount = pdf.numPages;
-    console.log(`[PDF] Successfully read ${file.name}: ${pageCount} pages`);
-    
-    // Clean up
-    pdf.destroy();
-    
-    return pageCount;
+    // First try pdfjs-dist if available
+    try {
+      const loadingTask = pdfjsLib.getDocument({ 
+        data: uint8Array,
+        disableAutoFetch: false,
+        disableStream: false,
+        disableRange: false,
+      });
+      
+      const pdf = await Promise.race([
+        loadingTask.promise,
+        new Promise((_, reject) => setTimeout(() => reject(new Error('PDF parsing timeout')), 5000))
+      ]);
+      
+      const pageCount = (pdf as any).numPages;
+      console.log(`[PDF] pdfjs-dist successfully read ${file.name}: ${pageCount} pages`);
+      
+      // Clean up
+      (pdf as any).destroy?.();
+      
+      return pageCount;
+    } catch (pdfJsError) {
+      console.warn('[PDF] pdfjs-dist failed, trying fallback parsing:', pdfJsError);
+      
+      // Fallback to manual parsing
+      const pageCount = extractPageCountFromPdfBytes(uint8Array);
+      console.log(`[PDF] Fallback parsing result: ${pageCount} pages`);
+      return pageCount;
+    }
   } catch (error) {
     console.error('Error counting PDF pages:', error);
-    
-    // Fallback: try alternative parsing
-    try {
-      console.log('[PDF] Attempting fallback parsing method...');
-      const arrayBuffer = await file.arrayBuffer();
-      const uint8Array = new Uint8Array(arrayBuffer);
-      
-      // Count /Page objects in PDF - rough estimation as fallback
-      const text = new TextDecoder().decode(uint8Array);
-      const pageMatches = text.match(/\/Type\s*\/Page\s*[^/]*/g) || [];
-      
-      if (pageMatches.length > 0) {
-        console.log(`[PDF] Fallback found approximately ${pageMatches.length} pages`);
-        return Math.max(1, pageMatches.length);
-      }
-    } catch (fallbackError) {
-      console.error('Fallback parsing also failed:', fallbackError);
-    }
-    
-    // If all else fails, return 1
-    console.warn('[PDF] Could not determine page count, defaulting to 1');
     return 1;
   }
 }
