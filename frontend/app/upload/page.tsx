@@ -54,10 +54,21 @@ export default function UploadPage() {
     const files = e.target.files;
     if (!files) return;
 
+    // Wait for pdfUtils to be ready
+    let attempts = 0;
+    while (!pdfUtils && attempts < 30) {
+      console.log('[Upload] Waiting for PDF utils... attempt', attempts);
+      await new Promise(resolve => setTimeout(resolve, 100));
+      attempts++;
+    }
+
     if (!pdfUtils) {
-      setError('PDF utilities not ready. Please try again.');
+      setError('PDF utilities not ready. Please refresh the page and try again.');
+      console.error('[Upload] PDF utils still not ready after waiting');
       return;
     }
+
+    console.log('[Upload] PDF utils ready, processing files...');
 
     const newFiles: UploadedFile[] = [];
     for (let i = 0; i < files.length; i++) {
@@ -85,7 +96,9 @@ export default function UploadPage() {
       const file = newFiles[i];
       if (file.name.toLowerCase().endsWith('.pdf')) {
         try {
+          console.log(`[Upload] Processing PDF: ${file.name}`);
           const pageCount = await pdfUtils.countPdfPages(file.file);
+          console.log(`[Upload] Got page count for ${file.name}: ${pageCount}`);
           setUploadedFiles((prev) =>
             prev.map((f) =>
               f.file === file.file
