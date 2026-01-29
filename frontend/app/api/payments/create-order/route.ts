@@ -34,8 +34,10 @@ export async function POST(request: NextRequest) {
     // Get Razorpay credentials
     const razorpayKeyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY;
     const razorpaySecret = process.env.RAZORPAY_SECRET;
+    const mockMode = process.env.NEXT_PUBLIC_MOCK_MODE === 'true';
 
-    if (!razorpayKeyId || !razorpaySecret || razorpayKeyId === 'test' || razorpaySecret === 'test') {
+    // Check if in mock/test mode
+    if (mockMode || !razorpayKeyId || !razorpaySecret || razorpayKeyId.includes('xxx') || razorpaySecret.includes('xxx')) {
       // Return mock response in test mode
       console.log('[MOCK MODE] Creating test order');
       return NextResponse.json(

@@ -96,12 +96,6 @@ ALTER TABLE activity_logs ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow public to view print jobs by print_id" ON print_jobs
   FOR SELECT USING (true);
 
-CREATE POLICY "Allow users to view their own print jobs" ON print_jobs
-  FOR SELECT USING (email = current_user_email() OR true);
-
--- Function to get current user email (optional)
--- In a real app, you'd use Supabase Auth for this
-CREATE OR REPLACE FUNCTION current_user_email() RETURNS VARCHAR AS $$
-  SELECT email FROM (SELECT email, row_number() over (order by created_at) as rn FROM users) 
-  WHERE rn = 1 LIMIT 1;
-$$ LANGUAGE SQL;
+-- Allow anyone to read print job status
+CREATE POLICY "Allow anyone to read print job status" ON print_jobs
+  FOR SELECT USING (true);
