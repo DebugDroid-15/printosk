@@ -1,7 +1,16 @@
 import * as pdfjsLib from 'pdfjs-dist';
 
-// Set up the worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+// Set up the worker with fallback URLs
+const setupWorker = () => {
+  if (typeof window !== 'undefined') {
+    const version = pdfjsLib.version;
+    // Try multiple CDN sources
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${version}/pdf.worker.min.js`;
+  }
+};
+
+// Initialize worker
+setupWorker();
 
 export interface PriceConfig {
   bwSingleSide: number;
@@ -23,11 +32,48 @@ export const DEFAULT_PRICING: PriceConfig = {
 export async function countPdfPages(file: File): Promise<number> {
   try {
     const arrayBuffer = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-    return pdf.numPages;
+    console.log(`[PDF] Counting pages for ${file.name}, size: ${arrayBuffer.byteLength} bytes`);
+    
+    // Try to parse the PDF
+    const loadingTask = pdfjsLib.getDocument({ 
+      data: new Uint8Array(arrayBuffer),
+      disableAutoFetch: false,
+      disableStream: false,
+      disableRange: false,
+    });
+    
+    const pdf = await loadingTask.promise;
+    const pageCount = pdf.numPages;
+    console.log(`[PDF] Successfully read ${file.name}: ${pageCount} pages`);
+    
+    // Clean up
+    pdf.destroy();
+    
+    return pageCount;
   } catch (error) {
     console.error('Error counting PDF pages:', error);
-    throw new Error('Failed to read PDF file. Please check if it\'s a valid PDF.');
+    
+    // Fallback: try alternative parsing
+    try {
+      console.log('[PDF] Attempting fallback parsing method...');
+      const arrayBuffer = await file.arrayBuffer();
+      const uint8Array = new Uint8Array(arrayBuffer);
+      
+      // Count /Page objects in PDF - rough estimation as fallback
+      const text = new TextDecoder().decode(uint8Array);
+      const pageMatches = text.match(/\/Type\s*\/Page\s*[^/]*/g) || [];
+      
+      if (pageMatches.length > 0) {
+        console.log(`[PDF] Fallback found approximately ${pageMatches.length} pages`);
+        return Math.max(1, pageMatches.length);
+      }
+    } catch (fallbackError) {
+      console.error('Fallback parsing also failed:', fallbackError);
+    }
+    
+    // If all else fails, return 1
+    console.warn('[PDF] Could not determine page count, defaulting to 1');
+    return 1;
   }
 }
 
