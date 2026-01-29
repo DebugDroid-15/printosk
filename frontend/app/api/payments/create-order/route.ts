@@ -36,8 +36,17 @@ export async function POST(request: NextRequest) {
     const razorpaySecret = process.env.RAZORPAY_SECRET;
     const mockMode = process.env.NEXT_PUBLIC_MOCK_MODE === 'true';
 
-    // Check if in mock/test mode
-    if (mockMode || !razorpayKeyId || !razorpaySecret || razorpayKeyId.includes('xxx') || razorpaySecret.includes('xxx')) {
+    // Log for debugging
+    console.log('Razorpay Mode Check:', {
+      mockMode,
+      hasKeyId: !!razorpayKeyId,
+      hasSecret: !!razorpaySecret,
+      keyIdValid: razorpayKeyId && !razorpayKeyId.includes('xxx') && razorpayKeyId.startsWith('rzp_test_'),
+      secretValid: razorpaySecret && !razorpaySecret.includes('xxx'),
+    });
+
+    // Check if in mock/test mode OR if credentials are missing/invalid
+    if (mockMode || !razorpayKeyId || !razorpaySecret || razorpayKeyId.includes('xxx') || razorpaySecret.includes('xxx') || !razorpayKeyId.startsWith('rzp_test_')) {
       // Return mock response in test mode
       console.log('[MOCK MODE] Creating test order');
       return NextResponse.json(
