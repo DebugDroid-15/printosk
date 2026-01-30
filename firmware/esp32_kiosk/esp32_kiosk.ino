@@ -15,11 +15,12 @@
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
 #include <Wire.h>
-#include <Adafruit_SSD1306.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SH110X.h>
 #include "config.h"
 
-// Display setup
-Adafruit_SSD1306 display(128, 64, &Wire, -1);
+// Display setup for SH1106
+Adafruit_SH1106G display(128, 64, &Wire, -1);
 
 // Global variables
 String currentPrintId = "";
@@ -122,22 +123,24 @@ void loop() {
 }
 
 void initializeDisplay() {
-  if (!display.begin(SSD1306_SWITCHCAPVCC, OLED_I2C_ADDRESS)) {
-    Serial.println("[Display] SSD1306 allocation failed");
+  Wire.begin(21, 22);  // I2C on GPIO 21 (SDA), 22 (SCL)
+  
+  if (!display.begin(0x3C, true)) {  // SH1106 address 0x3C, reset=true
+    Serial.println("[Display] SH1106 allocation failed");
     return;
   }
   
   // Clear and setup display
   display.clearDisplay();
   display.setTextSize(1);
-  display.setTextColor(SSD1306_WHITE);
+  display.setTextColor(SH110X_WHITE);
   display.setCursor(0, 0);
   display.println("Printosk Initializing...");
   display.display();
   
   delay(500);  // Let it display
   
-  Serial.println("[Display] SSD1306 Initialized");
+  Serial.println("[Display] SH1106 Initialized");
 }
 
 void initializeButtons() {
@@ -237,7 +240,7 @@ void displayWelcomeScreen() {
   currentState = STATE_WELCOME;
   display.clearDisplay();
   display.setTextSize(2);
-  display.setTextColor(SSD1306_WHITE);
+  display.setTextColor(SH110X_WHITE);
   display.setCursor(20, 10);
   display.println("PRINTOSK");
   
@@ -255,12 +258,12 @@ void displayInputScreen() {
   display.clearDisplay();
   
   display.setTextSize(2);
-  display.setTextColor(SSD1306_WHITE);
+  display.setTextColor(SH110X_WHITE);
   display.setCursor(20, 10);
   display.println("PRINT ID");
   
   display.setTextSize(2);
-  display.setTextColor(SSD1306_WHITE);
+  display.setTextColor(SH110X_WHITE);
   display.setCursor(30, 35);
   display.println(currentPrintId);
   
@@ -276,7 +279,7 @@ void displayFetchingScreen() {
   display.clearDisplay();
   
   display.setTextSize(1);
-  display.setTextColor(SSD1306_WHITE);
+  display.setTextColor(SH110X_WHITE);
   display.setCursor(30, 10);
   display.println("Fetching Job...");
   
