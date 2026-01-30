@@ -5,12 +5,11 @@
 #include "hardware/gpio.h"
 
 // UART Configuration for ESP32 Communication
-// Test with UART0 on GPIO 0 (RX) and GPIO 1 (TX)
-// If GPIO 8/9 doesn't work, try these pins
-#define UART_ID uart0
+// Using UART1 on GPIO 8 (TX) and GPIO 9 (RX) for Pico<->ESP32 communication
+#define UART_ID uart1
 #define BAUD_RATE 115200
-#define UART_TX_PIN 1   // GPIO 1 = UART0 TX (to ESP32 RX at GPIO 16)
-#define UART_RX_PIN 0   // GPIO 0 = UART0 RX (from ESP32 TX at GPIO 17)
+#define UART_TX_PIN 8  // GPIO 8 = UART1 TX (to ESP32 RX at GPIO 16)
+#define UART_RX_PIN 9  // GPIO 9 = UART1 RX (from ESP32 TX at GPIO 17)
 
 // LED Pin (built-in Pico LED)
 #define LED_PIN PICO_DEFAULT_LED_PIN
@@ -129,7 +128,14 @@ int main() {
     }
     
     // Main loop - listen for commands from ESP32
+    int heartbeat_count = 0;
     while (true) {
+        // Send heartbeat every 2 seconds to confirm UART is working
+        if (++heartbeat_count >= 2000) {
+            send_to_esp32("PICO_HEARTBEAT");
+            heartbeat_count = 0;
+        }
+        
         if (uart_is_readable(UART_ID)) {
             char c = uart_getc(UART_ID);
             
