@@ -2,8 +2,8 @@
 #define PRINTOSK_CONFIG_H
 
 // WiFi Configuration
-#define WIFI_SSID "your_wifi_ssid"
-#define WIFI_PASSWORD "your_wifi_password"
+#define WIFI_SSID "Manakusakuuuu"
+#define WIFI_PASSWORD "123456789"
 
 // API Configuration
 #define API_BASE_URL "https://printosk.vercel.app/api/kiosk"
@@ -16,14 +16,14 @@
 #define OLED_I2C_ADDRESS 0x3C
 
 // Keypad Pins (GPIO for numeric buttons 0-9)
-#define BUTTON_0_PIN 32
-#define BUTTON_1_PIN 33
-#define BUTTON_2_PIN 25
-#define BUTTON_3_PIN 26
-#define BUTTON_4_PIN 27
-#define BUTTON_5_PIN 14
-#define BUTTON_6_PIN 12
-#define BUTTON_7_PIN 13
+#define BUTTON_0_PIN 13
+#define BUTTON_1_PIN 12
+#define BUTTON_2_PIN 14
+#define BUTTON_3_PIN 27
+#define BUTTON_4_PIN 26
+#define BUTTON_5_PIN 25
+#define BUTTON_6_PIN 33
+#define BUTTON_7_PIN 32
 #define BUTTON_8_PIN 4
 #define BUTTON_9_PIN 5
 #define BUTTON_ENTER_PIN 15
