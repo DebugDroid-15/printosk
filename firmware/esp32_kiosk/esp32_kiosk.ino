@@ -294,7 +294,7 @@ void displayPrintingScreen() {
   display.clearDisplay();
   
   display.setTextSize(1);
-  display.setTextColor(SSD1306_WHITE);
+  display.setTextColor(SH110X_WHITE);
   display.setCursor(35, 10);
   display.println("Printing...");
   
@@ -309,7 +309,7 @@ void displaySuccessScreen() {
   display.clearDisplay();
   
   display.setTextSize(2);
-  display.setTextColor(SSD1306_WHITE);
+  display.setTextColor(SH110X_WHITE);
   display.setCursor(30, 20);
   display.println("SUCCESS!");
   
@@ -330,7 +330,7 @@ void displayErrorScreen(String message) {
   display.clearDisplay();
   
   display.setTextSize(1);
-  display.setTextColor(SSD1306_WHITE);
+  display.setTextColor(SH110X_WHITE);
   display.setCursor(25, 10);
   display.println("ERROR!");
   
@@ -349,7 +349,7 @@ void displayIdleScreen() {
   display.clearDisplay();
   
   display.setTextSize(1);
-  display.setTextColor(SSD1306_WHITE);
+  display.setTextColor(SH110X_WHITE);
   display.setCursor(20, 30);
   display.println("Idle - No Input");
   
