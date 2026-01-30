@@ -29,10 +29,11 @@
 #define BUTTON_ENTER_PIN 15
 
 // Serial Communication with Pico
-// Software UART using Pico GPIO 2 (bit-banging)
-#define PICO_SERIAL Serial2
-#define PICO_TX_PIN 17  // Not used in software UART
-#define PICO_RX_PIN 16  // Receives from Pico GPIO 2
+// Using Serial (UART0) instead of Serial2
+// GPIO 1 (TX) and GPIO 3 (RX)
+#define PICO_SERIAL Serial
+#define PICO_TX_PIN 1
+#define PICO_RX_PIN 3
 #define PICO_BAUD_RATE 115200
 
 // Application Settings
