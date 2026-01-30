@@ -420,8 +420,14 @@ void fetchPrintJob(String printId) {
 }
 
 void sendToPico(String command) {
-  PICO_SERIAL.println(command);
+  Serial.println("[Pico] DEBUG: Preparing to send: " + command);
+  delay(100);  // Small delay to ensure Pico is ready
+  PICO_SERIAL.print(command);
+  PICO_SERIAL.print("\n");  // Explicit newline
+  PICO_SERIAL.flush();      // Force flush the buffer
+  delay(50);                // Wait for data to be sent
   Serial.println("[Pico] Sent: " + command);
+  Serial.println("[Pico] Buffer flushed");
 }
 
 void updatePrintJobStatus(String printId, String status, String errorMsg) {
