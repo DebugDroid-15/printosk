@@ -27,6 +27,7 @@ DisplayState currentState = STATE_WELCOME;
 unsigned long lastInteractionTime = 0;
 bool wifiConnected = false;
 bool picoConnected = false;
+unsigned long lastPicoCheckTime = 0;
 
 // Button pins array
 const int buttonPins[11] = {
@@ -93,14 +94,25 @@ void loop() {
     String message = PICO_SERIAL.readStringUntil('\n');
     Serial.println("[Pico] Received: " + message);
     
-    if (message.indexOf("READY") > -1) {
+    if (message.indexOf("READY") > -1 || message.indexOf("TEST") > -1) {
       picoConnected = true;
+      Serial.println("[Pico] Connection established!");
     } else if (message.indexOf("ERROR") > -1) {
       displayErrorScreen("Printer Error: " + message);
       updatePrintJobStatus(currentPrintId, "ERROR", message);
     } else if (message.indexOf("COMPLETE") > -1) {
       displaySuccessScreen();
       updatePrintJobStatus(currentPrintId, "COMPLETED");
+    }
+  }
+  
+  // Check Pico status every 5 seconds
+  if (millis() - lastPicoCheckTime > 5000) {
+    lastPicoCheckTime = millis();
+    if (picoConnected) {
+      Serial.println("[System] Pico connected: YES");
+    } else {
+      Serial.println("[System] Pico connected: NO - waiting for response...");
     }
   }
   
