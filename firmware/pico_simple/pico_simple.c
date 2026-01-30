@@ -49,6 +49,7 @@ void init_gpio() {
 void send_to_esp32(const char *message) {
     uart_puts(UART_ID, message);
     uart_puts(UART_ID, "\n");
+    uart_tx_wait_blocking(UART_ID);  // Wait for transmission to complete
 }
 
 void handle_command(const char *cmd) {
@@ -110,8 +111,12 @@ int main() {
     init_gpio();
     init_uart();
     
+    // Give UART time to stabilize
+    sleep_ms(1000);
+    
     // Send startup message
     send_to_esp32("PICO_INITIALIZED");
+    sleep_ms(100);
     send_to_esp32("WAITING_FOR_ESP32");
     
     // Blink LED rapidly to indicate ready
