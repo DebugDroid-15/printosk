@@ -27,7 +27,6 @@ DisplayState currentState = STATE_WELCOME;
 unsigned long lastInteractionTime = 0;
 bool wifiConnected = false;
 bool picoConnected = false;
-unsigned long lastPicoCheckTime = 0;
 
 // Button pins array
 const int buttonPins[11] = {
@@ -45,6 +44,7 @@ void initializeDisplay();
 void initializeButtons();
 void initializeSerial();
 void initializeWiFi();
+void handleKeypadInput();
 void handleButtonPress(int buttonIndex);
 void displayWelcomeScreen();
 void displayInputScreen();
@@ -106,15 +106,8 @@ void loop() {
     }
   }
   
-  // Check Pico status every 5 seconds
-  if (millis() - lastPicoCheckTime > 5000) {
-    lastPicoCheckTime = millis();
-    if (picoConnected) {
-      Serial.println("[System] Pico connected: YES");
-    } else {
-      Serial.println("[System] Pico connected: NO - waiting for response...");
-    }
-  }
+  // Handle keypad input
+  handleKeypadInput();
   
   // Auto-clear screen after timeout
   if (currentState != STATE_WELCOME && currentState != STATE_IDLE) {
@@ -184,6 +177,23 @@ void initializeWiFi() {
   } else {
     Serial.println("\n[WiFi] Failed to connect");
     wifiConnected = false;
+  }
+}
+
+void handleKeypadInput() {
+  // Check each button
+  for (int i = 0; i < 11; i++) {
+    if (digitalRead(buttonPins[i]) == LOW) {  // Button pressed (active low)
+      delay(20);  // Debounce
+      if (digitalRead(buttonPins[i]) == LOW) {
+        handleButtonPress(i);
+        // Wait for button release
+        while (digitalRead(buttonPins[i]) == LOW) {
+          delay(10);
+        }
+        delay(20);  // Debounce release
+      }
+    }
   }
 }
 
