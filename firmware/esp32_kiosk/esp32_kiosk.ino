@@ -152,8 +152,10 @@ void initializeButtons() {
 }
 
 void initializeSerial() {
-  PICO_SERIAL.begin(PICO_BAUD_RATE, SERIAL_8N1, PICO_RX_PIN, PICO_TX_PIN);
-  Serial.println("[Serial] Pico communication initialized");
+  // Serial uses GPIO 3 (RX) and GPIO 1 (TX) by default
+  // No need to pass pins for Serial object - it uses hardware default
+  PICO_SERIAL.begin(PICO_BAUD_RATE);
+  Serial.println("[Serial] Pico communication initialized on Serial (GPIO 3/1)");
   
   // Send initial handshake
   delay(500);
