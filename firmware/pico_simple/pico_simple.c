@@ -37,11 +37,13 @@ int main() {
         sleep_ms(100);
     }
     
-    // Send startup message
-    uart_puts(UART_ID, "PICO_START\n");
-    sleep_ms(500);
+    // Send startup message MULTIPLE times
+    for (int i = 0; i < 10; i++) {
+        uart_puts(UART_ID, "PICO_START\n");
+        sleep_ms(100);
+    }
     
-    // Main loop - send test message every 1 second
+    // Main loop - send test message EVERY 500ms (more frequently)
     int counter = 0;
     while (1) {
         char msg[64];
@@ -53,7 +55,7 @@ int main() {
         sleep_ms(50);
         gpio_put(LED_PIN, 0);
         
-        sleep_ms(1000);
+        sleep_ms(500);  // Every 500ms instead of 1000ms
     }
     
     return 0;
