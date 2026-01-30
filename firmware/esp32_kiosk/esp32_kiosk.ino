@@ -145,6 +145,7 @@ void initializeSerial() {
   
   // Send initial handshake
   delay(500);
+  Serial.println("[Pico] Sending: ESP_READY");
   PICO_SERIAL.println("ESP_READY");
 }
 
