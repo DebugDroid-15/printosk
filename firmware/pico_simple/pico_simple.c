@@ -120,7 +120,20 @@ void handle_print_command(const char *command) {
     char job_id[32];
     int file_count = 0;
     
+    uart_puts(ESP32_UART_ID, "[Pico] DEBUG: Parsing command: ");
+    uart_puts(ESP32_UART_ID, command);
+    uart_puts(ESP32_UART_ID, "\n");
+    
     if (sscanf(command, "START_PRINT:%31[^:]:%d", job_id, &file_count) == 2) {
+        uart_puts(ESP32_UART_ID, "[Pico] DEBUG: Command parsed successfully\n");
+        uart_puts(ESP32_UART_ID, "[Pico] DEBUG: Job ID: ");
+        uart_puts(ESP32_UART_ID, job_id);
+        uart_puts(ESP32_UART_ID, "\n");
+        uart_puts(ESP32_UART_ID, "[Pico] DEBUG: File count: ");
+        char temp[16];
+        sprintf(temp, "%d\n", file_count);
+        uart_puts(ESP32_UART_ID, temp);
+        
         uart_puts(ESP32_UART_ID, "[Pico] Processing: ");
         uart_puts(ESP32_UART_ID, command);
         uart_puts(ESP32_UART_ID, "\n");
@@ -128,19 +141,25 @@ void handle_print_command(const char *command) {
         led_blink(3, 100);
         
         // Initialize printer
+        uart_puts(ESP32_UART_ID, "[Pico] DEBUG: Initializing printer...\n");
         printer_init();
         sleep_ms(500);
         
         // Print header
+        uart_puts(ESP32_UART_ID, "[Pico] DEBUG: Sending alignment command...\n");
         printer_set_align(1);  // Center align
+        uart_puts(ESP32_UART_ID, "[Pico] DEBUG: Setting bold...\n");
         printer_set_bold(1);
+        uart_puts(ESP32_UART_ID, "[Pico] DEBUG: Setting size...\n");
         printer_set_size(0x11);  // Double width, normal height
+        uart_puts(ESP32_UART_ID, "[Pico] DEBUG: Printing PRINTOSK header...\n");
         printer_text("PRINTOSK\n");
         printer_set_bold(0);
         printer_set_size(0);
         printer_linefeed(1);
         
         // Print job info
+        uart_puts(ESP32_UART_ID, "[Pico] DEBUG: Printing job info...\n");
         printer_set_align(0);  // Left align
         printer_text("Job ID: ");
         printer_text(job_id);
@@ -154,16 +173,20 @@ void handle_print_command(const char *command) {
         printer_linefeed(2);
         
         // Print footer
+        uart_puts(ESP32_UART_ID, "[Pico] DEBUG: Printing footer...\n");
         printer_set_align(1);
         printer_text("Thank you for printing!\n");
         printer_linefeed(1);
         
         // Cut paper
+        uart_puts(ESP32_UART_ID, "[Pico] DEBUG: Cutting paper...\n");
         printer_cut();
         
         // Notify ESP32
         uart_puts(ESP32_UART_ID, "[Pico] Print job completed\n");
         led_blink(2, 200);
+    } else {
+        uart_puts(ESP32_UART_ID, "[Pico] ERROR: Command parsing failed\n");
     }
 }
 
