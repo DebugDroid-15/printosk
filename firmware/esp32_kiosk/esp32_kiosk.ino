@@ -127,12 +127,16 @@ void initializeDisplay() {
     return;
   }
   
+  // Clear and setup display
   display.clearDisplay();
+  display.setContrast(255);  // Max contrast
   display.setTextSize(1);
   display.setTextColor(SSD1306_WHITE);
   display.setCursor(0, 0);
   display.println("Printosk Initializing...");
   display.display();
+  
+  delay(500);  // Let it display
   
   Serial.println("[Display] SSD1306 Initialized");
 }
@@ -233,6 +237,7 @@ void handleButtonPress(int buttonIndex) {
 void displayWelcomeScreen() {
   currentState = STATE_WELCOME;
   display.clearDisplay();
+  display.setContrast(255);
   display.setTextSize(2);
   display.setTextColor(SSD1306_WHITE);
   display.setCursor(20, 10);
@@ -250,18 +255,21 @@ void displayWelcomeScreen() {
 void displayInputScreen() {
   currentState = STATE_INPUT_ID;
   display.clearDisplay();
+  display.setContrast(255);
   
   display.setTextSize(2);
   display.setTextColor(SSD1306_WHITE);
   display.setCursor(20, 10);
   display.println("PRINT ID");
   
-  display.setTextSize(1);
-  display.setCursor(40, 35);
+  display.setTextSize(2);
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(30, 35);
   display.println(currentPrintId);
   
-  display.setCursor(0, 50);
-  display.println("Entered: " + String(currentPrintId.length()) + "/" + String(MAX_PRINT_ID_LENGTH));
+  display.setTextSize(1);
+  display.setCursor(0, 55);
+  display.println(String(currentPrintId.length()) + "/" + String(MAX_PRINT_ID_LENGTH));
   
   display.display();
 }
