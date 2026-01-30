@@ -237,11 +237,23 @@ int main() {
     uart_puts(ESP32_UART_ID, "PICO_INITIALIZED\n");
     sleep_ms(100);
     uart_puts(ESP32_UART_ID, "WAITING_FOR_ESP32\n");
+    sleep_ms(100);
+    
+    // Send heartbeat every 5 seconds to verify UART working
+    int heartbeat_counter = 0;
     
     // Main loop - listen for commands from ESP32
     memset(esp32_rx_buffer, 0, RX_BUFFER_SIZE);
+    int heartbeat_counter = 0;
     
     while (1) {
+        // Heartbeat every 5 seconds
+        heartbeat_counter++;
+        if (heartbeat_counter > 500) {  // 500 * 10ms = 5 seconds
+            uart_puts(ESP32_UART_ID, "[Pico] HEARTBEAT\n");
+            heartbeat_counter = 0;
+        }
+        
         if (uart_is_readable(ESP32_UART_ID)) {
             char c = uart_getc(ESP32_UART_ID);
             
@@ -249,6 +261,9 @@ int main() {
                 // Command complete
                 if (esp32_rx_index > 0) {
                     esp32_rx_buffer[esp32_rx_index] = '\0';
+                    uart_puts(ESP32_UART_ID, "[Pico] RECEIVED: ");
+                    uart_puts(ESP32_UART_ID, esp32_rx_buffer);
+                    uart_puts(ESP32_UART_ID, "\n");
                     process_command(esp32_rx_buffer);
                     memset(esp32_rx_buffer, 0, RX_BUFFER_SIZE);
                     esp32_rx_index = 0;
