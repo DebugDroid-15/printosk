@@ -5,11 +5,11 @@
 #include "hardware/gpio.h"
 
 // UART Configuration for ESP32 Communication
-// Using UART0 on GPIO 0 (RX) and GPIO 1 (TX) for Pico<->ESP32 communication
-#define UART_ID uart0
+// Using UART1 on GPIO 8 (TX) and GPIO 9 (RX) for Pico<->ESP32 communication
+#define UART_ID uart1
 #define BAUD_RATE 115200
-#define UART_TX_PIN 1  // GPIO 1 = UART0 TX
-#define UART_RX_PIN 0  // GPIO 0 = UART0 RX
+#define UART_TX_PIN 8  // GPIO 8 = UART1 TX (to ESP32 RX at GPIO 16)
+#define UART_RX_PIN 9  // GPIO 9 = UART1 RX (from ESP32 TX at GPIO 17)
 
 // LED Pin (built-in Pico LED)
 #define LED_PIN PICO_DEFAULT_LED_PIN
@@ -23,9 +23,13 @@ void init_uart() {
     // Initialize UART1 at 115200 baud
     uart_init(UART_ID, BAUD_RATE);
     
-    // Set GPIO pins for UART
+    // Set GPIO pins for UART1
+    // GPIO 8 = UART1 TX, GPIO 9 = UART1 RX
     gpio_set_function(UART_TX_PIN, GPIO_FUNC_UART);
     gpio_set_function(UART_RX_PIN, GPIO_FUNC_UART);
+    
+    // Optional: Set up GPIO pins (no pull-ups needed for UART)
+    // gpio_pull_up(UART_RX_PIN);  // Pull-up on RX line (optional)
 }
 
 void init_gpio() {
