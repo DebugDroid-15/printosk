@@ -218,6 +218,12 @@ void process_command(const char *buffer) {
     else if (strstr(buffer, "START_PRINT")) {
         handle_print_command(buffer);
     }
+    else if (strstr(buffer, "TEST_ECHO")) {
+        uart_puts(ESP32_UART_ID, "[Pico] ECHO_RECEIVED: ");
+        uart_puts(ESP32_UART_ID, buffer);
+        uart_puts(ESP32_UART_ID, "\n");
+        led_blink(1, 100);
+    }
     else if (strlen(buffer) > 0) {
         uart_puts(ESP32_UART_ID, "[Pico] Unknown command: ");
         uart_puts(ESP32_UART_ID, buffer);

@@ -203,8 +203,31 @@ void handleKeypadInput() {
   }
 }
 
+// Variables for testing
+unsigned long lastButtonTime = 0;
+String debugSequence = "";
+
 void handleButtonPress(int buttonIndex) {
   lastInteractionTime = millis();
+  unsigned long currentTime = millis();
+  
+  // Track debug sequence for test mode (press 0, 0, 0 within 3 seconds)
+  if (buttonIndex == 0) {
+    if (currentTime - lastButtonTime > 3000) {
+      debugSequence = "0";
+    } else {
+      debugSequence += "0";
+    }
+    lastButtonTime = currentTime;
+    
+    if (debugSequence == "000") {
+      testPicoCommunication();
+      debugSequence = "";
+      return;
+    }
+  } else {
+    debugSequence = "";
+  }
   
   if (buttonIndex < 10) {
     // Numeric button (0-9)
@@ -428,6 +451,23 @@ void sendToPico(String command) {
   delay(50);                // Wait for data to be sent
   Serial.println("[Pico] Sent: " + command);
   Serial.println("[Pico] Buffer flushed");
+}
+
+// Test communication with Pico using echo
+void testPicoCommunication() {
+  Serial.println("\n========== PICO COMMUNICATION TEST ==========");
+  Serial.println("1. Checking for HEARTBEAT (should appear every 5 seconds)");
+  Serial.println("2. Sending TEST_ECHO command...");
+  
+  sendToPico("TEST_ECHO");
+  
+  Serial.println("3. Waiting 5 seconds for Pico responses...");
+  for (int i = 0; i < 5; i++) {
+    Serial.print(".");
+    delay(1000);
+  }
+  Serial.println("\nTest complete. Check serial output above.");
+  Serial.println("==========================================\n");
 }
 
 void updatePrintJobStatus(String printId, String status, String errorMsg) {
