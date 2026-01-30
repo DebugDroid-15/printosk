@@ -1,13 +1,15 @@
 #include <stdio.h>
+#include <string.h>
 #include "pico/stdlib.h"
 #include "hardware/uart.h"
 #include "hardware/gpio.h"
 
 // UART Configuration for ESP32 Communication
-#define UART_ID uart1
+// Using UART0 on GPIO 0 (RX) and GPIO 1 (TX) for Pico<->ESP32 communication
+#define UART_ID uart0
 #define BAUD_RATE 115200
-#define UART_TX_PIN 8
-#define UART_RX_PIN 9
+#define UART_TX_PIN 1  // GPIO 1 = UART0 TX
+#define UART_RX_PIN 0  // GPIO 0 = UART0 RX
 
 // LED Pin (built-in Pico LED)
 #define LED_PIN PICO_DEFAULT_LED_PIN
@@ -15,6 +17,7 @@
 // Buffer for receiving commands
 char rx_buffer[256];
 int rx_index = 0;
+bool pico_ready = false;
 
 void init_uart() {
     // Initialize UART1 at 115200 baud
@@ -23,9 +26,6 @@ void init_uart() {
     // Set GPIO pins for UART
     gpio_set_function(UART_TX_PIN, GPIO_FUNC_UART);
     gpio_set_function(UART_RX_PIN, GPIO_FUNC_UART);
-    
-    // Enable UART interrupt
-    uart_set_irq_enabled(UART_ID, UART_IRQ_RX, true);
 }
 
 void init_gpio() {
@@ -33,14 +33,13 @@ void init_gpio() {
     gpio_init(LED_PIN);
     gpio_set_dir(LED_PIN, GPIO_OUT);
     
-    // Blink LED to show Pico is ready
-    gpio_put(LED_PIN, 1);
-    sleep_ms(200);
-    gpio_put(LED_PIN, 0);
-    sleep_ms(200);
-    gpio_put(LED_PIN, 1);
-    sleep_ms(200);
-    gpio_put(LED_PIN, 0);
+    // Blink LED to show Pico is ready (3 blinks)
+    for (int i = 0; i < 3; i++) {
+        gpio_put(LED_PIN, 1);
+        sleep_ms(200);
+        gpio_put(LED_PIN, 0);
+        sleep_ms(200);
+    }
 }
 
 void send_to_esp32(const char *message) {
