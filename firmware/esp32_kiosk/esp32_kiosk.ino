@@ -361,11 +361,15 @@ void fetchPrintJob(String printId) {
   http.setTimeout(API_TIMEOUT);
   
   Serial.println("[API] Fetching: " + url);
+  Serial.println("[API] Waiting for response...");
   int httpCode = http.GET();
+  
+  Serial.println("[API] HTTP Code: " + String(httpCode));
   
   if (httpCode == HTTP_CODE_OK) {
     String payload = http.getString();
     Serial.println("[API] Response received: " + String(payload.length()) + " bytes");
+    Serial.println("[API] Response: " + payload);
     
     // Parse JSON response
     DynamicJsonDocument doc(8192);
@@ -394,6 +398,7 @@ void fetchPrintJob(String printId) {
       }
     } else {
       displayErrorScreen("Parse error");
+      Serial.println("[API] JSON error: " + String(error.c_str()));
     }
   } else if (httpCode == 404) {
     displayErrorScreen("Print ID not found");
