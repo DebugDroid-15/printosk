@@ -129,7 +129,6 @@ void initializeDisplay() {
   
   // Clear and setup display
   display.clearDisplay();
-  display.setContrast(255);  // Max contrast
   display.setTextSize(1);
   display.setTextColor(SSD1306_WHITE);
   display.setCursor(0, 0);
@@ -237,7 +236,6 @@ void handleButtonPress(int buttonIndex) {
 void displayWelcomeScreen() {
   currentState = STATE_WELCOME;
   display.clearDisplay();
-  display.setContrast(255);
   display.setTextSize(2);
   display.setTextColor(SSD1306_WHITE);
   display.setCursor(20, 10);
@@ -255,7 +253,6 @@ void displayWelcomeScreen() {
 void displayInputScreen() {
   currentState = STATE_INPUT_ID;
   display.clearDisplay();
-  display.setContrast(255);
   
   display.setTextSize(2);
   display.setTextColor(SSD1306_WHITE);
