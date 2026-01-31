@@ -32,6 +32,8 @@ void uart_puts(uart_inst_t *uart, const char *str) {
     for (int i = 0; str[i]; i++) {
         uart_putc(uart, str[i]);
     }
+    // Flush after each message to ensure immediate transmission
+    sleep_ms(5);
 }
 
 void uart_write_bytes(uart_inst_t *uart, const uint8_t *data, int len) {
@@ -239,11 +241,20 @@ int main() {
     // Blink LED 5 times at startup
     led_blink(5, 100);
     
-    // Send initialization message
-    uart_puts(ESP32_UART_ID, "PICO_INITIALIZED\n");
+    // Send detailed initialization messages
+    uart_puts(ESP32_UART_ID, "[Pico] ===== PICO INITIALIZATION START =====\n");
     sleep_ms(100);
-    uart_puts(ESP32_UART_ID, "WAITING_FOR_ESP32\n");
+    uart_puts(ESP32_UART_ID, "[Pico] LED initialized\n");
+    sleep_ms(50);
+    uart_puts(ESP32_UART_ID, "[Pico] UART1 (ESP32) initialized at 115200 baud\n");
+    sleep_ms(50);
+    uart_puts(ESP32_UART_ID, "[Pico] UART0 (Printer) initialized at 115200 baud\n");
+    sleep_ms(50);
+    uart_puts(ESP32_UART_ID, "[Pico] ===== PICO READY =====\n");
+    uart_puts(ESP32_UART_ID, "PICO_READY\n");
     sleep_ms(100);
+    uart_puts(ESP32_UART_ID, "[Pico] Waiting for ESP32 commands...\n");
+    sleep_ms(100)
     
     // Send heartbeat every 5 seconds to verify UART working
     int heartbeat_counter = 0;
@@ -253,10 +264,10 @@ int main() {
     int heartbeat_counter = 0;
     
     while (1) {
-        // Heartbeat every 5 seconds
+        // Heartbeat every 5 seconds (500 * 10ms = 5000ms)
         heartbeat_counter++;
-        if (heartbeat_counter > 500) {  // 500 * 10ms = 5 seconds
-            uart_puts(ESP32_UART_ID, "[Pico] HEARTBEAT\n");
+        if (heartbeat_counter > 500) {
+            uart_puts(ESP32_UART_ID, "[Pico] HEARTBEAT - System alive and waiting for commands\n");
             heartbeat_counter = 0;
         }
         

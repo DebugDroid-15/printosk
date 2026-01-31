@@ -29,6 +29,12 @@ unsigned long lastInteractionTime = 0;
 bool wifiConnected = false;
 bool picoConnected = false;
 
+// Pico communication buffer for active listening
+#define PICO_RX_BUFFER_SIZE 512
+char picoRxBuffer[PICO_RX_BUFFER_SIZE];
+int picoRxIndex = 0;
+unsigned long lastPicoMessageTime = 0;
+
 // Button pins array
 const int buttonPins[11] = {
   BUTTON_0_PIN, BUTTON_1_PIN, BUTTON_2_PIN, BUTTON_3_PIN, BUTTON_4_PIN,
@@ -90,22 +96,9 @@ void loop() {
     }
   }
   
-  // Check Pico connection
-  if (PICO_SERIAL.available()) {
-    String message = PICO_SERIAL.readStringUntil('\n');
-    Serial.println("[Pico] Received: " + message);
-    
-    if (message.indexOf("READY") > -1 || message.indexOf("TEST") > -1) {
-      picoConnected = true;
-      Serial.println("[Pico] Connection established!");
-    } else if (message.indexOf("ERROR") > -1) {
-      displayErrorScreen("Printer Error: " + message);
-      updatePrintJobStatus(currentPrintId, "ERROR", message);
-    } else if (message.indexOf("COMPLETE") > -1) {
-      displaySuccessScreen();
-      updatePrintJobStatus(currentPrintId, "COMPLETED");
-    }
-  }
+  // ===== ACTIVE LISTENING FOR PICO =====
+  // Process ALL available messages from Pico (continuous drain)
+  processPicoMessages();
   
   // Handle keypad input
   handleKeypadInput();
@@ -119,7 +112,7 @@ void loop() {
     }
   }
   
-  delay(50);
+  delay(10);  // Small delay to prevent CPU hogging
 }
 
 void initializeDisplay() {
@@ -199,6 +192,49 @@ void handleKeypadInput() {
         }
         delay(20);  // Debounce release
       }
+    }
+  }
+}
+
+// Active listener for Pico messages - processes all available data
+void processPicoMessages() {
+  // Drain all available data from Pico UART
+  while (PICO_SERIAL.available()) {
+    char c = PICO_SERIAL.read();
+    
+    if (c == '\n') {
+      // Complete message received
+      if (picoRxIndex > 0) {
+        picoRxBuffer[picoRxIndex] = '\0';  // Null terminate
+        lastPicoMessageTime = millis();
+        
+        // Print complete message to serial monitor
+        Serial.println("[Pico] Received: " + String(picoRxBuffer));
+        
+        // Process message
+        String message = String(picoRxBuffer);
+        
+        if (message.indexOf("READY") > -1 || message.indexOf("HEARTBEAT") > -1) {
+          picoConnected = true;
+        } else if (message.indexOf("ERROR") > -1) {
+          displayErrorScreen("Printer Error: " + message);
+          updatePrintJobStatus(currentPrintId, "ERROR", message);
+        } else if (message.indexOf("COMPLETE") > -1) {
+          displaySuccessScreen();
+          updatePrintJobStatus(currentPrintId, "COMPLETED");
+        }
+        
+        // Reset buffer
+        picoRxIndex = 0;
+        memset(picoRxBuffer, 0, PICO_RX_BUFFER_SIZE);
+      }
+    } 
+    else if (c == '\r') {
+      // Ignore carriage return
+      continue;
+    }
+    else if (picoRxIndex < PICO_RX_BUFFER_SIZE - 1) {
+      picoRxBuffer[picoRxIndex++] = c;
     }
   }
 }
