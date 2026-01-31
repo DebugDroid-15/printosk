@@ -254,7 +254,7 @@ int main() {
     uart_puts(ESP32_UART_ID, "PICO_READY\n");
     sleep_ms(100);
     uart_puts(ESP32_UART_ID, "[Pico] Waiting for ESP32 commands...\n");
-    sleep_ms(100)
+    sleep_ms(100);
     
     // Send heartbeat every 5 seconds to verify UART working
     int heartbeat_counter = 0;
