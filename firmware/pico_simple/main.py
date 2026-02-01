@@ -10,7 +10,8 @@ from machine import UART, Pin
 # UART Configuration
 # UART1 (ESP32): TX=GPIO8 (Pin 11), RX=GPIO9 (Pin 12)
 # UART0 (Printer): TX=GPIO0 (Pin 1), RX=GPIO1 (Pin 2)
-uart = UART(1, baudrate=115200, tx=Pin(8), rx=Pin(9))
+uart = UART(1, 115200)
+uart.init(tx=Pin(8), rx=Pin(9), baudrate=115200)
 
 # LED for status indication (GPIO25 on Pico)
 led = Pin(25, Pin.OUT)
@@ -184,9 +185,7 @@ def main():
         print("\n[PICO] Shutting down...")
         blink_led(5, 100)
     except Exception as e:
-        print(f"\n[ERROR] {e}")
-        import traceback
-        traceback.print_exc()
+        print(f"\n[ERROR] {str(e)}")
         blink_led(10, 50)
 
 if __name__ == "__main__":
