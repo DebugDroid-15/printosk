@@ -8,10 +8,9 @@ import utime
 from machine import UART, Pin
 
 # UART Configuration
-# UART1 (ESP32): TX=GPIO8 (Pin 11), RX=GPIO9 (Pin 12)
-# UART0 (Printer): TX=GPIO0 (Pin 1), RX=GPIO1 (Pin 2)
+# UART1 (ESP32): Default pins are TX=GPIO8, RX=GPIO9 on Pico
+# These connect to ESP32 Serial1: GPIO 18 (TX), GPIO 19 (RX)
 uart = UART(1, 115200)
-uart.init(tx=Pin(8), rx=Pin(9), baudrate=115200)
 
 # LED for status indication (GPIO25 on Pico)
 led = Pin(25, Pin.OUT)
