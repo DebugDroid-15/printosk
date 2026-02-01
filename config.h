@@ -29,11 +29,11 @@
 #define BUTTON_ENTER_PIN 15
 
 // Serial Communication with Pico
-// Using Serial2 (UART2) with GPIO 16 (RX) and GPIO 17 (TX)
-// These connect to Pico UART1: GPIO 9 (RX) and GPIO 8 (TX)
-#define PICO_SERIAL Serial2
-#define PICO_TX_PIN 17
-#define PICO_RX_PIN 16
+// Using Serial1 (UART1) with GPIO 18 (TX) and GPIO 19 (RX)
+// These connect to Pico UART1: GPIO 8 (TX) and GPIO 9 (RX)
+#define PICO_SERIAL Serial1
+#define PICO_TX_PIN 18
+#define PICO_RX_PIN 19
 #define PICO_BAUD_RATE 115200
 
 // Application Settings

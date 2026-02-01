@@ -15,7 +15,7 @@
  * 
  * Pin Configuration:
  * - I2C: GPIO 21 (SDA), GPIO 22 (SCL) - OLED Display
- * - UART: GPIO 1 (TX), GPIO 3 (RX) - Pico Communication
+ * - UART: GPIO 18 (TX), GPIO 19 (RX) - Pico Communication (Serial1)
  * - Keypad: GPIO 13, 12, 14, 27, 26, 25, 33, 32, 4, 5, 15
  * 
  * Baud Rates:
@@ -214,11 +214,11 @@ void initializeButtons() {
 void initializeSerial() {
   Serial.println("[Serial] Initializing Pico UART communication...");
   
-  // Serial2 uses GPIO 16 (RX) and GPIO 17 (TX)
-  // These connect to Pico UART1: GPIO 9 (RX) and GPIO 8 (TX)
+  // Serial1 uses GPIO 18 (TX) and GPIO 19 (RX)
+  // These connect to Pico UART1: GPIO 8 (TX) and GPIO 9 (RX)
   PICO_SERIAL.begin(PICO_BAUD_RATE, SERIAL_8N1, PICO_RX_PIN, PICO_TX_PIN);
   
-  Serial.println("[Serial] Pico communication on Serial2 (GPIO 16 RX, GPIO 17 TX)");
+  Serial.println("[Serial] Pico communication on Serial1 (GPIO 18 TX, GPIO 19 RX)");
   Serial.println("[Serial] Connecting to Pico UART1 (GPIO 8 TX, GPIO 9 RX)");
   Serial.println("[Serial] Baud rate: 115200");
   
