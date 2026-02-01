@@ -30,15 +30,15 @@ jobs:
           git clone https://github.com/raspberrypi/pico-sdk.git
           cd pico-sdk
           git submodule update --init
-          export PICO_SDK_PATH=/tmp/pico-sdk
       
       - name: Build firmware
+        env:
+          PICO_SDK_PATH: /tmp/pico-sdk
         run: |
-          export PICO_SDK_PATH=/tmp/pico-sdk
           cd firmware/pico_simple
           mkdir -p build
           cd build
-          cmake -DCMAKE_BUILD_TYPE=Release ..
+          cmake -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles" ..
           make -j$(nproc)
       
       - name: Check build output
