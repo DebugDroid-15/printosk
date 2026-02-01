@@ -105,24 +105,30 @@ def process_esp32_message(message):
 
 def read_uart_messages():
     """Read all available messages from UART buffer"""
-    global rx_index
+    global rx_index, message_count
     
-    while uart.any():
-        byte = uart.read(1)
-        if byte:
-            rx_buffer[rx_index] = byte[0]
-            rx_index += 1
-            
-            # Check for newline or buffer full
-            if byte[0] == ord('\n') or rx_index >= len(rx_buffer) - 1:
-                # Process complete message
-                message = bytes(rx_buffer[:rx_index]).strip()
-                if message:
-                    process_esp32_message(message)
-                rx_index = 0
+    # Check if data is available
+    bytes_available = uart.any()
     
-    # Show diagnostic info periodically
-    return rx_index > 0  # Return True if we're receiving data
+    if bytes_available:
+        # Read up to 64 bytes at a time
+        data = uart.read(min(64, bytes_available))
+        if data:
+            for byte in data:
+                rx_buffer[rx_index] = byte
+                rx_index += 1
+                
+                # Check for newline or buffer full
+                if byte == ord('\n') or rx_index >= len(rx_buffer) - 1:
+                    # Process complete message
+                    message = bytes(rx_buffer[:rx_index]).strip()
+                    if message:
+                        process_esp32_message(message)
+                    rx_index = 0
+        
+        return True  # Return True if we received data
+    
+    return False  # No data available
 
 def main():
     """Main loop"""
@@ -162,11 +168,14 @@ def main():
             diagnostic_counter += 1
             if diagnostic_counter >= 300:  # 300 * 100ms = 30 seconds
                 diagnostic_counter = 0
+                bytes_available = uart.any()
                 if message_count == 0:
-                    print("[DIAGNOSTIC] No messages received. Check UART connection.")
-                    print(f"  - UART buffer available: {uart.any()} bytes")
+                    print(f"[DIAGNOSTIC] No messages received in {diagnostic_counter//10}s")
+                    print(f"  - UART buffer: {bytes_available} bytes available")
+                    print(f"  - Try: Check GPIO 8/9 connections between ESP32 and Pico")
                 else:
                     print(f"[DIAGNOSTIC] Received {message_count} messages so far")
+                    print(f"  - UART buffer: {bytes_available} bytes available")
             
             # Sleep 100ms between iterations
             utime.sleep_ms(100)
