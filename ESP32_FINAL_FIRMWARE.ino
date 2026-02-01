@@ -51,6 +51,8 @@ bool picoConnected = false;
 char picoRxBuffer[PICO_RX_BUFFER_SIZE];
 int picoRxIndex = 0;
 unsigned long lastPicoMessageTime = 0;
+unsigned long lastHeartbeatTime = 0;  // Track heartbeat timing
+int espHeartbeatCounter = 0;  // Heartbeat counter
 
 // ============= BUTTON CONFIGURATION =============
 const int buttonPins[11] = {
@@ -139,6 +141,21 @@ void loop() {
   // Process ALL available messages from Pico UART
   // This ensures no messages are missed due to timing
   processPicoMessages();
+  
+  // ===== SEND HEARTBEAT TO PICO =====
+  // Send heartbeat every 5 seconds (5000ms)
+  unsigned long currentTime = millis();
+  if (currentTime - lastHeartbeatTime >= 5000) {
+    lastHeartbeatTime = currentTime;
+    espHeartbeatCounter++;
+    
+    // Send heartbeat message
+    String heartbeat = "ESP32_HEARTBEAT:" + String(espHeartbeatCounter);
+    PICO_SERIAL.println(heartbeat);
+    PICO_SERIAL.flush();
+    
+    Serial.println("[Heartbeat] Sent: " + heartbeat);
+  }
   
   // ===== HANDLE USER INPUT =====
   handleKeypadInput();
