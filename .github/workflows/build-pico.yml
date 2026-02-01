@@ -42,6 +42,11 @@ jobs:
           make -j$(nproc) -v 2>&1 | head -100
           ls -lah pico_simple.* || echo "Build artifacts not found"
       
+      - name: Convert ELF to UF2
+        run: |
+          cd firmware/pico_simple
+          python3 elf2uf2.py build/pico_simple.elf build/pico_simple.uf2
+      
       - name: Check build output
         run: |
           ls -lah firmware/pico_simple/build/pico_simple.*
