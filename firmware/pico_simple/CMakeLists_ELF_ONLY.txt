@@ -1,0 +1,38 @@
+cmake_minimum_required(VERSION 3.12)
+
+# Set PICO_SDK_PATH if not already set
+if(NOT DEFINED PICO_SDK_PATH)
+    set(PICO_SDK_PATH "$ENV{PICO_SDK_PATH}")
+    if(NOT PICO_SDK_PATH)
+        message(FATAL_ERROR "PICO_SDK_PATH environment variable or CMake variable must be set")
+    endif()
+endif()
+
+# Pull in SDK (must be before project)
+include(${PICO_SDK_PATH}/external/pico_sdk_import.cmake)
+
+project(pico_simple_elf)
+
+# Initialize the SDK
+pico_sdk_init()
+
+# Add executable
+add_executable(pico_simple.elf
+    pico_simple.c
+)
+
+# Pull in common dependencies
+target_link_libraries(pico_simple.elf
+    pico_stdlib
+    hardware_uart
+    hardware_gpio
+)
+
+# Enable USB output, disable UART output
+pico_enable_stdio_usb(pico_simple.elf 0)
+pico_enable_stdio_uart(pico_simple.elf 0)
+
+# Generate map and hex files
+add_custom_command(TARGET pico_simple.elf POST_BUILD
+    COMMAND arm-none-eabi-objcopy -O binary pico_simple.elf pico_simple.bin
+)
