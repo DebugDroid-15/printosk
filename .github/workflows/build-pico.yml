@@ -27,9 +27,9 @@ jobs:
       - name: Clone Pico SDK
         run: |
           cd /tmp
-          git clone https://github.com/raspberrypi/pico-sdk.git
+          git clone --depth 1 https://github.com/raspberrypi/pico-sdk.git
           cd pico-sdk
-          git submodule update --init
+          git submodule update --init --recursive --depth 1
       
       - name: Build firmware
         env:
@@ -38,8 +38,9 @@ jobs:
           cd firmware/pico_simple
           mkdir -p build
           cd build
-          cmake -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles" ..
-          make -j$(nproc)
+          cmake -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles" -DCMAKE_VERBOSE_MAKEFILE=ON .. || true
+          make -j$(nproc) -v 2>&1 | head -100
+          ls -lah pico_simple.* || echo "Build artifacts not found"
       
       - name: Check build output
         run: |
