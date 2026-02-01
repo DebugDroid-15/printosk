@@ -8,8 +8,9 @@ import utime
 from machine import UART, Pin
 
 # UART Configuration
-# TX: GPIO0 (Pin 1), RX: GPIO1 (Pin 2)
-uart = UART(0, baudrate=115200, tx=Pin(0), rx=Pin(1))
+# UART1 (ESP32): TX=GPIO8 (Pin 11), RX=GPIO9 (Pin 12)
+# UART0 (Printer): TX=GPIO0 (Pin 1), RX=GPIO1 (Pin 2)
+uart = UART(1, baudrate=115200, tx=Pin(8), rx=Pin(9))
 
 # LED for status indication (GPIO25 on Pico)
 led = Pin(25, Pin.OUT)
@@ -18,8 +19,9 @@ led = Pin(25, Pin.OUT)
 pico_ready = True
 print_status = "IDLE"
 current_print_job = None
-last_heartbeat_from_esp32 = 0
+last_heartbeat_from_esp32 = utime.time()  # Initialize to current time
 pico_heartbeat_counter = 0
+message_count = 0  # Track messages received
 
 # Response buffer
 rx_buffer = bytearray(512)
@@ -42,8 +44,9 @@ def send_message(message):
 
 def process_esp32_message(message):
     """Process incoming message from ESP32"""
-    global print_status, current_print_job, last_heartbeat_from_esp32, pico_ready
+    global print_status, current_print_job, last_heartbeat_from_esp32, pico_ready, message_count
     
+    message_count += 1
     message_str = message.decode('utf-8', errors='ignore').strip()
     print(f"[PICO] Received: {message_str}")
     
@@ -117,27 +120,31 @@ def read_uart_messages():
                 if message:
                     process_esp32_message(message)
                 rx_index = 0
+    
+    # Show diagnostic info periodically
+    return rx_index > 0  # Return True if we're receiving data
 
 def main():
     """Main loop"""
-    global pico_heartbeat_counter
+    global pico_heartbeat_counter, last_heartbeat_from_esp32, message_count
     
     print("\n" + "="*50)
     print("PICO MICROPYTHON CONTROLLER STARTED")
     print("="*50)
-    print("UART0: TX=GPIO0 (Pin 1), RX=GPIO1 (Pin 2)")
-    print("Baudrate: 115200")
+    print("UART1: TX=GPIO8 (Pin 11), RX=GPIO9 (Pin 12)")
+    print("Connected to ESP32 at 115200 baud")
     print("Waiting for ESP32 heartbeat...\n")
     
     blink_led(3, 100)  # Startup indicator
     
     # Main loop
     loop_counter = 0
+    diagnostic_counter = 0
     
     try:
         while True:
             # Read any incoming messages
-            read_uart_messages()
+            has_data = read_uart_messages()
             
             # Increment heartbeat counter every 5 seconds
             loop_counter += 1
@@ -145,11 +152,21 @@ def main():
                 pico_heartbeat_counter += 1
                 loop_counter = 0
                 
-                # Check if we received heartbeat from ESP32 recently
+                # Check if we received heartbeat recently (within 15 seconds)
                 time_since_heartbeat = utime.time() - last_heartbeat_from_esp32
                 if time_since_heartbeat > 15:
-                    print(f"[WARNING] No ESP32 heartbeat for {time_since_heartbeat}s")
+                    print(f"[WARNING] No heartbeat for {time_since_heartbeat}s (Messages: {message_count})")
                     blink_led(1, 50)
+            
+            # Show diagnostic every 30 seconds
+            diagnostic_counter += 1
+            if diagnostic_counter >= 300:  # 300 * 100ms = 30 seconds
+                diagnostic_counter = 0
+                if message_count == 0:
+                    print("[DIAGNOSTIC] No messages received. Check UART connection.")
+                    print(f"  - UART buffer available: {uart.any()} bytes")
+                else:
+                    print(f"[DIAGNOSTIC] Received {message_count} messages so far")
             
             # Sleep 100ms between iterations
             utime.sleep_ms(100)
@@ -159,6 +176,8 @@ def main():
         blink_led(5, 100)
     except Exception as e:
         print(f"\n[ERROR] {e}")
+        import traceback
+        traceback.print_exc()
         blink_led(10, 50)
 
 if __name__ == "__main__":
