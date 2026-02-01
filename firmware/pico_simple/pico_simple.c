@@ -28,13 +28,8 @@ int esp32_rx_index = 0;
 #define GS 0x1D
 #define DC2 0x12
 
-void uart_puts(uart_inst_t *uart, const char *str) {
-    for (int i = 0; str[i]; i++) {
-        uart_putc(uart, str[i]);
-    }
-    // Flush after each message to ensure immediate transmission
-    sleep_ms(5);
-}
+// Use SDK's built-in uart_puts (no need for custom wrapper)
+// The SDK handles buffering and transmission properly
 
 void uart_write_bytes(uart_inst_t *uart, const uint8_t *data, int len) {
     for (int i = 0; i < len; i++) {
