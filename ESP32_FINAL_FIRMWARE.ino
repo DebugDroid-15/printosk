@@ -197,11 +197,12 @@ void initializeButtons() {
 void initializeSerial() {
   Serial.println("[Serial] Initializing Pico UART communication...");
   
-  // Serial (default) uses GPIO 1 (TX) and GPIO 3 (RX)
-  // This is the hardware serial port on ESP32
-  PICO_SERIAL.begin(PICO_BAUD_RATE);
+  // Serial2 uses GPIO 16 (RX) and GPIO 17 (TX)
+  // These connect to Pico UART1: GPIO 9 (RX) and GPIO 8 (TX)
+  PICO_SERIAL.begin(PICO_BAUD_RATE, SERIAL_8N1, PICO_RX_PIN, PICO_TX_PIN);
   
-  Serial.println("[Serial] Pico communication on Serial (GPIO 3 RX, GPIO 1 TX)");
+  Serial.println("[Serial] Pico communication on Serial2 (GPIO 16 RX, GPIO 17 TX)");
+  Serial.println("[Serial] Connecting to Pico UART1 (GPIO 8 TX, GPIO 9 RX)");
   Serial.println("[Serial] Baud rate: 115200");
   
   // Small delay for Pico to initialize
