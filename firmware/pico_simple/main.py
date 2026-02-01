@@ -27,7 +27,7 @@ message_count = 0  # Track messages received
 rx_buffer = bytearray(512)
 rx_index = 0
 
-def blink_led(times=1, duration=100):
+def blink_led(times, duration):
     """Blink LED for status indication"""
     for _ in range(times):
         led.on()
@@ -37,10 +37,10 @@ def blink_led(times=1, duration=100):
 
 def send_message(message):
     """Send message to ESP32 via UART"""
-    if isinstance(message, str):
+    if type(message) == str:
         message = message.encode() + b'\n'
     uart.write(message)
-    print(f"[PICO] Sent: {message}")
+    print("[PICO] Sent: " + str(message))
 
 def process_esp32_message(message):
     """Process incoming message from ESP32"""
@@ -141,7 +141,7 @@ def main():
     print("Connected to ESP32 at 115200 baud")
     print("Waiting for ESP32 heartbeat...\n")
     
-    blink_led(3, 100)  # Startup indicator
+    blink_led(3, 100)
     
     # Main loop
     loop_counter = 0
