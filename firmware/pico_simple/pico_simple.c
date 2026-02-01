@@ -261,7 +261,6 @@ int main() {
     
     // Main loop - listen for commands from ESP32
     memset(esp32_rx_buffer, 0, RX_BUFFER_SIZE);
-    int heartbeat_counter = 0;
     
     while (1) {
         // Heartbeat every 5 seconds (500 * 10ms = 5000ms)
